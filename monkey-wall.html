@@ -1,0 +1,195 @@
+<!-- MonkeyNet — Monkey Wall (Supabase-backed, free; falls back to local demo) -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monkey Wall · MonkeyNet</title>
+<style>
+  :root{--bg:#0A0E0B;--panel:#121A14;--panel2:#1A231C;--ink:#F1F4EC;--muted:#9DB0A0;
+    --banana:#F5C518;--jungle:#49B85B;--line:#27332B;--danger:#E5563C}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  a{color:inherit;text-decoration:none}
+  .topbar{position:sticky;top:0;z-index:5;background:rgba(10,14,11,.86);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);padding:12px 20px;display:flex;align-items:center;gap:16px}
+  .brand{font-family:Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif;font-size:22px;
+    text-transform:uppercase;letter-spacing:.5px}
+  .brand .g{color:var(--jungle)}
+  .topbar a{color:var(--muted);font-weight:700;font-size:14px}
+  .topbar a:hover{color:var(--banana)}
+  .topbar .sp{margin-left:auto;color:var(--banana);font-weight:700;font-size:14px}
+  .wrap{max-width:680px;margin:0 auto;padding:22px 16px 80px}
+
+  .banner{background:rgba(245,197,24,.1);border:1px solid rgba(245,197,24,.4);color:#F0E2B0;
+    border-radius:10px;padding:10px 12px;font-size:12.5px;line-height:1.5;margin-bottom:16px}
+
+  .composer{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:22px}
+  .drop{border:2px dashed var(--line);border-radius:12px;padding:22px;text-align:center;cursor:pointer;
+    color:var(--muted);font-size:14px;transition:border-color .15s}
+  .drop:hover{border-color:var(--banana)}
+  .drop.has{padding:0;border-style:solid;overflow:hidden}
+  .drop.has img{width:100%;max-height:320px;object-fit:contain;display:block;background:#000}
+  textarea{width:100%;margin-top:12px;background:var(--panel2);color:var(--ink);border:1px solid var(--line);
+    border-radius:10px;padding:10px;font-size:14px;font-family:inherit;resize:vertical;min-height:54px}
+  .row{display:flex;gap:10px;margin-top:12px;align-items:center}
+  .btn{padding:11px 18px;border:none;border-radius:10px;font-weight:800;font-size:14px;cursor:pointer}
+  .btn.y{background:var(--banana);color:var(--bg)}
+  .btn.o{background:var(--panel2);color:var(--ink);border:1px solid var(--line)}
+  .btn:disabled{opacity:.5;cursor:default}
+  .spacer{margin-left:auto;color:var(--muted);font-size:12px}
+
+  .post{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:16px}
+  .post img{width:100%;display:block;background:#000}
+  .post .meta{padding:12px 14px}
+  .post .cap{font-size:15px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+  .post .time{color:var(--muted);font-size:12px;margin-top:6px}
+  .feedhead{display:flex;align-items:center;margin:6px 0 14px}
+  .feedhead h2{font-size:16px;margin:0;letter-spacing:.04em}
+  .feedhead .count{margin-left:auto;color:var(--muted);font-size:13px}
+  .empty{color:var(--muted);text-align:center;padding:40px 0;font-size:14px}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);
+    padding:11px 18px;border-radius:999px;font-weight:700;font-size:14px;opacity:0;transition:.25s;
+    pointer-events:none;z-index:9}
+  .toast.show{opacity:1}
+</style>
+
+<div class="topbar">
+  <div class="brand">Monkey<span class="g">Wall</span></div>
+  <a href="index.html">Hub</a>
+  <a href="monkey-maker.html">Maker</a>
+  <span class="sp" id="modeTag">·</span>
+</div>
+
+<div class="wrap">
+  <div class="banner" id="banner" style="display:none"></div>
+
+  <div class="composer">
+    <div class="drop" id="drop">
+      <span id="dropText">Tap to add a monkey 🐵 &nbsp;·&nbsp; or make one in MonkeyMaker first</span>
+      <input type="file" id="file" accept="image/*" hidden>
+    </div>
+    <textarea id="cap" placeholder="say something simian..."></textarea>
+    <div class="row">
+      <button class="btn y" id="post" disabled>Post to the wall</button>
+      <a class="btn o" href="monkey-maker.html">Make a monkey</a>
+      <span class="spacer" id="status"></span>
+    </div>
+  </div>
+
+  <div class="feedhead"><h2>THE COLONY</h2><span class="count" id="count"></span></div>
+  <div id="feed"><div class="empty" id="loading">Loading the canopy…</div></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ CONFIG ============
+   Paste these from your Supabase project (Settings → API) to go public + free.
+   Leave blank to run in local demo mode (shared storage; visible in preview only). */
+const SUPABASE_URL  = '';   // e.g. https://abcdefgh.supabase.co
+const SUPABASE_ANON = '';   // the public "anon" key (safe to expose; RLS protects your data)
+const BUCKET = 'monkeys';
+/* ================================ */
+
+const useSupa = !!(SUPABASE_URL && SUPABASE_ANON);
+const HAS_LOCAL = (typeof window!=='undefined') && !!window.storage;
+
+/* ---- backend abstraction: returns/accepts {caption, src, ts} ---- */
+const Store = {
+  async list(){
+    if(useSupa){
+      const r=await fetch(`${SUPABASE_URL}/rest/v1/posts?select=*&order=created_at.desc&limit=100`,
+        {headers:{apikey:SUPABASE_ANON, Authorization:'Bearer '+SUPABASE_ANON}});
+      if(!r.ok) throw new Error('list failed'); const rows=await r.json();
+      return rows.map(p=>({caption:p.caption||'', src:p.image_url, ts:new Date(p.created_at).getTime()}));
+    }
+    if(HAS_LOCAL){ const out=[];
+      try{ const res=await window.storage.list('wall:item:', true);
+        if(res&&res.keys) for(const k of res.keys){ try{ const g=await window.storage.get(k,true);
+          if(g){ const it=JSON.parse(g.value); out.push({caption:it.caption,src:it.img,ts:it.ts}); } }catch(e){} } }catch(e){}
+      return out.sort((a,b)=>b.ts-a.ts);
+    }
+    return [];
+  },
+  async add(caption, canvas){
+    if(useSupa){
+      const blob=await new Promise(res=>canvas.toBlob(res,'image/jpeg',0.82));
+      const path=Date.now()+'-'+Math.random().toString(36).slice(2)+'.jpg';
+      const up=await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${path}`,
+        {method:'POST', headers:{apikey:SUPABASE_ANON, Authorization:'Bearer '+SUPABASE_ANON,
+          'Content-Type':'image/jpeg'}, body:blob});
+      if(!up.ok) throw new Error('upload failed');
+      const image_url=`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${path}`;
+      const ins=await fetch(`${SUPABASE_URL}/rest/v1/posts`,
+        {method:'POST', headers:{apikey:SUPABASE_ANON, Authorization:'Bearer '+SUPABASE_ANON,
+          'Content-Type':'application/json', Prefer:'return=minimal'},
+          body:JSON.stringify({caption, image_url})});
+      if(!ins.ok) throw new Error('insert failed');
+      return;
+    }
+    if(HAS_LOCAL){
+      const img=canvas.toDataURL('image/jpeg',0.72);
+      const id='w'+Date.now()+Math.floor(Math.random()*1000);
+      await window.storage.set('wall:item:'+id, JSON.stringify({caption,img,ts:Date.now()}), true);
+      return;
+    }
+    throw new Error('no backend');
+  }
+};
+
+/* ---- mode banner ---- */
+const banner=document.getElementById('banner'), modeTag=document.getElementById('modeTag');
+if(useSupa){ modeTag.textContent='live'; }
+else { modeTag.textContent='demo';
+  banner.style.display='block';
+  banner.innerHTML='<b>Local demo mode.</b> Posts are stored in this browser session so you can try the flow. '
+    +'Add your Supabase URL + anon key in the CONFIG block to make it a real public wall (free).'; }
+
+/* ---- compose ---- */
+let pickedCanvas=null;
+const drop=document.getElementById('drop'), fileEl=document.getElementById('file'),
+      postBtn=document.getElementById('post'), capEl=document.getElementById('cap'),
+      statusEl=document.getElementById('status');
+drop.onclick=()=>fileEl.click();
+fileEl.onchange=e=>{ const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader(); r.onload=()=>{ const im=new Image(); im.onload=()=>{
+    let w=im.width,h=im.height; const s=Math.min(1,1000/Math.max(w,h)); w=Math.round(w*s); h=Math.round(h*s);
+    const c=document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').drawImage(im,0,0,w,h);
+    pickedCanvas=c;
+    drop.classList.add('has'); drop.innerHTML=''; const prev=new Image(); prev.src=c.toDataURL('image/jpeg',0.85);
+    drop.appendChild(prev); drop.appendChild(fileEl);
+    postBtn.disabled=false;
+  }; im.src=r.result; }; r.readAsDataURL(f); };
+
+postBtn.onclick=async()=>{
+  if(!pickedCanvas) return;
+  postBtn.disabled=true; statusEl.textContent='Posting…';
+  try{ await Store.add(capEl.value.trim(), pickedCanvas);
+    statusEl.textContent=''; toast('Posted to the wall 🐵');
+    pickedCanvas=null; capEl.value='';
+    drop.classList.remove('has'); drop.innerHTML='<span id="dropText">Tap to add a monkey 🐵</span>'; drop.appendChild(fileEl);
+    loadFeed();
+  }catch(e){ statusEl.textContent=''; postBtn.disabled=false; toast('Post failed — check your Supabase setup'); }
+};
+
+/* ---- feed ---- */
+function rel(ts){ const s=Math.floor((Date.now()-ts)/1000);
+  if(s<60) return 'just now'; if(s<3600) return Math.floor(s/60)+'m ago';
+  if(s<86400) return Math.floor(s/3600)+'h ago'; return Math.floor(s/86400)+'d ago'; }
+async function loadFeed(){
+  const feed=document.getElementById('feed');
+  try{ const posts=await Store.list();
+    document.getElementById('count').textContent=posts.length+(posts.length===1?' monkey':' monkeys');
+    if(!posts.length){ feed.innerHTML='<div class="empty">No monkeys yet. Be the first to post 🍌</div>'; return; }
+    feed.innerHTML='';
+    posts.forEach(p=>{ const d=document.createElement('div'); d.className='post';
+      const im=document.createElement('img'); im.src=p.src; im.loading='lazy'; d.appendChild(im);
+      const m=document.createElement('div'); m.className='meta';
+      if(p.caption){ const c=document.createElement('div'); c.className='cap'; c.textContent=p.caption; m.appendChild(c); }
+      const t=document.createElement('div'); t.className='time'; t.textContent=rel(p.ts); m.appendChild(t);
+      d.appendChild(m); feed.appendChild(d); });
+  }catch(e){ feed.innerHTML='<div class="empty">Could not load the wall.</div>'; }
+}
+loadFeed();
+
+let toastT; function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2200); }
+</script>
