@@ -7,8 +7,8 @@ An untamed, chaotic thicket of the web engineered specifically for forging high-
 | File | What it is |
 |---|---|
 | `index.html` | Hub / landing page |
-| `monkey-maker.html` | The meme studio |
-| `monkey-wall.html` | Community feed (wire up Supabase — see `monkeynet-deploy.md`) |
+| `monkey-maker.html` | The meme studio (posts straight to the Gallery) |
+| `monkey-gallery.html` | Shared gallery — hang a monkey, no accounts/feed (wire up Supabase — see `monkeynet-deploy.md`) |
 | `monkeynet-writings.html` | The Simian Singularity manifesto |
 
 ## Deploy
@@ -17,7 +17,7 @@ See `monkeynet-deploy.md` for the full Cloudflare Pages + Supabase setup.
 
 **Quick version:**
 1. Connect this repo in Cloudflare Pages (Framework: None, Output dir: `/`, Build command: blank)
-2. Create a Supabase project, run the SQL in `monkeynet-deploy.md`, paste the URL + anon key into `monkey-wall.html`
+2. Create a Supabase project, run the SQL in `monkeynet-deploy.md`, paste the URL + anon key into `monkey-gallery.html`
 
 ## Stack
 
