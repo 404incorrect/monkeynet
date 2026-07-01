@@ -5,12 +5,12 @@
 <title>MonkeyMaker</title>
 <style>
   :root{
-    --panel:rgba(18,24,20,.9); --panel2:rgba(26,33,28,.92); --line:rgba(245,197,24,.22);
-    --banana:#F5C518; --jungle:#3FA34D; --jungle2:#2E7D3A;
-    --cream:#F1F4EC; --muted:#9DB0A0; --danger:#E5563C;
+    --panel:rgba(30,37,32,.9); --panel2:rgba(40,48,42,.92); --line:rgba(242,212,121,.24);
+    --banana:#F2D479; --jungle:#67C389; --jungle2:#4EA86C;
+    --cream:#F5F2E9; --muted:#AFC1B4; --danger:#E5775F;
   }
   *{box-sizing:border-box}
-  html{background:#0B0E0C}
+  html{background:#12160F}
   body{margin:0;min-height:100vh;color:var(--cream);
     font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;}
   body::before{content:"";position:fixed;inset:0;z-index:-2;
@@ -21,7 +21,7 @@
   header{display:flex;align-items:baseline;gap:12px;margin-bottom:18px;flex-wrap:wrap}
   .logo{font-family:Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif;
     font-size:40px;letter-spacing:.5px;line-height:1;text-transform:uppercase;
-    background:linear-gradient(180deg,#FFE16B,#E0A800);
+    background:linear-gradient(180deg,#FBE7A6,#EBC56B);
     -webkit-background-clip:text;background-clip:text;color:transparent;
     filter:drop-shadow(0 3px 6px rgba(0,0,0,.55))}
   .logo span{color:var(--jungle);-webkit-text-fill-color:var(--jungle)}
@@ -48,9 +48,9 @@
   .body.on{display:block}
   h3{margin:2px 0 10px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 
-  .monkeys{display:grid;gap:7px;grid-template-columns:repeat(3,1fr);
-    max-height:460px;overflow-y:auto;padding-right:4px}
-  .monkeys.expanded{max-height:none;overflow:visible}
+  .monkeys{display:grid;gap:7px;grid-template-columns:repeat(3,1fr);grid-auto-rows:min-content;
+    align-content:start;max-height:min(460px,42vh);overflow-y:auto;padding-right:4px}
+  .monkeys.expanded{max-height:min(900px,60vh)}
   .stickers{display:grid;gap:8px;grid-template-columns:repeat(4,1fr)}
   .mk{aspect-ratio:1;border-radius:10px;border:2px solid transparent;overflow:hidden;
     cursor:pointer;background:#000;padding:0;min-width:0;min-height:0}
@@ -98,55 +98,19 @@
   .selbar button.del{color:var(--danger);border-color:#5a2a22}
   .note{background:rgba(63,163,77,.12);border:1px solid rgba(63,163,77,.4);border-radius:10px;
     padding:10px 12px;font-size:12px;color:#BFE6C4;line-height:1.55;margin-top:14px}
-  .admin-link{margin-left:auto;font-size:12px;color:var(--muted);cursor:pointer;
-    text-decoration:underline;text-underline-offset:3px;align-self:center}
   .mk{position:relative}
   .mk .mktag{position:absolute;top:3px;right:3px;font-size:11px;background:rgba(0,0,0,.6);
     border-radius:6px;padding:1px 4px;line-height:1.3}
-  .overlay{display:none;position:fixed;inset:0;z-index:50;background:rgba(6,10,8,.82);
-    backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:18px}
-  .modal{background:var(--panel);border:1px solid var(--line);border-radius:16px;max-width:560px;width:100%;
-    max-height:84vh;overflow:auto;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
-  .modal h2{margin:0 0 4px;font-size:20px}
-  .modal .sub{color:var(--muted);font-size:12px;margin-bottom:14px;line-height:1.5}
-  .adminCard{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;
-    padding:10px;margin-bottom:10px;background:var(--panel2)}
-  .adminCard img{width:90px;height:90px;object-fit:cover;border-radius:8px;background:#000;flex:none}
-  .adminBtns{display:flex;gap:8px;margin-left:auto}
-  .adminBtns .btn{width:auto;padding:8px 14px;margin-top:0}
   .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--cream);
     color:#0B0E0C;padding:11px 18px;border-radius:999px;font-weight:700;font-size:14px;
     box-shadow:0 8px 24px rgba(0,0,0,.5);opacity:0;transition:.25s;pointer-events:none;z-index:9}
   .toast.show{opacity:1}
-  .adminbtn{margin-left:auto;padding:8px 14px;border:1px solid var(--line);background:rgba(18,24,20,.8);
-    color:var(--cream);border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;backdrop-filter:blur(6px)}
-  .overlay{position:fixed;inset:0;z-index:20;background:rgba(6,10,8,.82);backdrop-filter:blur(4px);
-    display:flex;align-items:flex-start;justify-content:center;padding:30px 16px;overflow:auto}
-  .adminCard{background:var(--panel);border:1px solid var(--line);border-radius:16px;max-width:760px;
-    width:100%;padding:18px}
-  .adminCard .ahead{display:flex;align-items:center;gap:10px;margin-bottom:6px}
-  .adminCard .ahead .logo{font-size:24px}
-  .adminCard .ahead button{margin-left:auto;background:none;border:none;color:var(--cream);font-size:26px;cursor:pointer}
-  .adminGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin:8px 0 4px}
-  .acard{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel2)}
-  .acard img{width:100%;height:120px;object-fit:cover;display:block;background:#000}
-  .acard .arow{display:flex;gap:6px;padding:7px}
-  .acard .arow button{flex:1;padding:7px;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer}
-  .ok{background:var(--jungle);color:#fff}.no{background:#5a2a22;color:#ffd9d2}
-  .empty{color:var(--muted);font-size:13px;padding:6px 2px}
-  .connect{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  .connect button{padding:10px;border:1px solid var(--line);background:var(--panel2);color:var(--cream);
-    border-radius:9px;cursor:pointer;font-size:13px;font-weight:600}
-  .connect button:hover{border-color:var(--banana)}
-  .connect button.on{background:var(--jungle);color:#fff;border-color:var(--jungle)}
-  code{background:rgba(245,197,24,.14);padding:1px 5px;border-radius:5px;font-size:11px}
 </style>
 
 <div class="wrap">
   <header>
     <div class="logo">Monkey<span>Maker</span></div>
     <div class="tag">by MonkeyNet</div>
-    <button id="adminBtn" class="adminbtn">Admin</button>
   </header>
 
   <div class="grid">
@@ -182,8 +146,6 @@
         <button class="btn ghost sm" id="expandMonkeys" style="margin-top:8px">Show all monkeys</button>
         <button class="btn ghost sm" id="uploadBtn" style="margin-top:10px">Upload a monkey photo</button>
         <input type="file" id="fileInput" accept="image/*" hidden>
-        <button class="btn primary sm" id="submitCommunity" style="margin-top:8px;display:none">Share this monkey to the community &rarr;</button>
-        <div class="hint" id="communityHint" style="display:none">Adds your monkey to the review queue. An admin approves it before it shows up for everyone.</div>
 
         <h3 style="margin-top:18px">Filter</h3>
         <div class="toggle" id="filterRow">
@@ -264,39 +226,10 @@
         </div>
 
         <h3 style="margin-top:18px">Post it now</h3>
-        <button class="btn primary" id="shareBtn">Share to apps&hellip;</button>
         <button class="btn gold" id="downloadBtn">Download</button>
-        <div class="hint">
-          &ldquo;Share to apps&rdquo; opens your device&rsquo;s share sheet so you can drop the meme
-          straight into Instagram, X, WhatsApp, etc. with your caption attached.
-        </div>
-
-        <h3 style="margin-top:18px">Connect accounts</h3>
-        <div class="connect" id="connectRow">
-          <button data-p="x">X / Twitter</button>
-          <button data-p="instagram">Instagram</button>
-          <button data-p="reddit">Reddit</button>
-          <button data-p="tumblr">Tumblr</button>
-        </div>
-        <div class="hint">
-          Connecting uses each platform&rsquo;s official sign-in (OAuth) &mdash; MonkeyMaker never sees
-          your password. Add your client IDs and backend URL to the <code>OAUTH</code> config to go live.
-        </div>
+        <div class="hint">Save the meme, then post it wherever you like.</div>
       </div>
     </div>
-  </div>
-</div>
-<div class="overlay" id="adminModal" style="display:none">
-  <div class="adminCard">
-    <div class="ahead"><div class="logo">Monkey<span>Maker</span></div>
-      <span class="tag">admin &middot; monkey review</span>
-      <button id="adminClose" aria-label="Close">&times;</button></div>
-    <h3>Pending review</h3>
-    <div class="adminGrid" id="adminPending"></div>
-    <div class="empty" id="pendingEmpty">No monkeys waiting.</div>
-    <h3 style="margin-top:16px">Approved (live in the picker)</h3>
-    <div class="adminGrid" id="adminApproved"></div>
-    <div class="empty" id="approvedEmpty">None approved yet.</div>
   </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -331,19 +264,6 @@ const CAPTIONS = [
 ];
 function rollCaption(){ const t=document.getElementById('caption');
   t.value=CAPTIONS[Math.floor(Math.random()*CAPTIONS.length)]; }
-
-/* OAuth config — fill these in to go live on your hosted site + backend */
-const OAUTH = {
-  redirectUri: location.origin + location.pathname,
-  backendUrl: '',   // your server endpoint that exchanges the code and posts
-  providers: {
-    x:        { authUrl:'https://twitter.com/i/oauth2/authorize',      clientId:'', scope:'tweet.read tweet.write users.read offline.access' },
-    instagram:{ authUrl:'https://www.facebook.com/v19.0/dialog/oauth', clientId:'', scope:'instagram_basic,instagram_content_publish,pages_show_list' },
-    reddit:   { authUrl:'https://www.reddit.com/api/v1/authorize',     clientId:'', scope:'submit identity' },
-    tumblr:   { authUrl:'https://www.tumblr.com/oauth2/authorize',     clientId:'', scope:'write' }
-  }
-};
-const connected = {};
 
 const RATIOS = [[1080,1080],[1080,1080],[1080,1080],[1080,1080],[1080,1080],[1080,1080],[1080,1080],[1080,1080],[1080,1920],[1080,1080],[1080,1080],[1080,1080],[1080,1350],[1080,1080],[1080,1350],[1080,1350]];
 
@@ -501,85 +421,11 @@ document.getElementById('expandMonkeys').onclick=function(){
   const ex=document.getElementById('monkeyGrid').classList.toggle('expanded');
   this.textContent=ex?'Show fewer':'Show all monkeys'; };
 
-/* ---------- community gallery + admin review ----------
-   Prototype: runs on the artifact's shared storage so the whole
-   submit -> review -> approve -> appears-in-picker loop works live.
-   For the hosted product, swap these 4 calls for your backend. */
-const HAS_STORE = (typeof window!=='undefined') && !!window.storage;
-const communityAdded = new Set();
-function bestRatio(w,h){ const a=w/h, c=[[1080,1080,1],[1080,1350,0.8],[1080,1920,0.5625]];
-  let best=c[0],d=1e9; c.forEach(x=>{const dd=Math.abs(a-x[2]); if(dd<d){d=dd;best=x;}}); return [best[0],best[1]]; }
-function downscale(src,max,cb){ const im=new Image(); im.onload=()=>{ let w=im.width,h=im.height;
-  const s=Math.min(1,max/Math.max(w,h)); w=Math.round(w*s); h=Math.round(h*s);
-  const c=document.createElement('canvas'); c.width=w; c.height=h;
-  c.getContext('2d').drawImage(im,0,0,w,h); cb(c.toDataURL('image/jpeg',0.72),w,h); }; im.src=src; }
-
-document.getElementById('submitCommunity').onclick=()=>{
-  if(!lastUploadSrc) return;
-  if(!HAS_STORE){ toast('Community needs the hosted backend (see notes)'); return; }
-  downscale(lastUploadSrc,640,async(uri,w,h)=>{
-    const id='m'+Date.now()+Math.floor(Math.random()*1000);
-    try{ await window.storage.set('community:item:'+id, JSON.stringify({id,status:'pending',w,h,img:uri}), true);
-      toast('Sent to the review queue \u2014 thanks!');
-      document.getElementById('submitCommunity').style.display='none'; }
-    catch(e){ toast('Could not submit right now'); } });
-};
-
-function addCommunityMonkey(it){
-  if(communityAdded.has(it.id)) return; communityAdded.add(it.id);
-  const i=MONKEYS.length; MONKEYS.push(it.img); RATIOS.push(bestRatio(it.w,it.h));
-  const btn=document.createElement('button'); btn.className='mk';
-  const im=document.createElement('img'); im.src=it.img; im.loading='lazy'; btn.appendChild(im);
-  btn.onclick=()=>{ document.querySelectorAll('.mk').forEach(m=>m.classList.remove('on'));
-    btn.classList.add('on'); const r=RATIOS[i]||[1080,1080]; setRatio(r[0],r[1]); loadBg(it.img); };
-  document.getElementById('monkeyGrid').appendChild(btn);
-}
-async function eachCommunityItem(fn){ if(!HAS_STORE) return;
-  try{ const res=await window.storage.list('community:item:', true); if(!res||!res.keys) return;
-    for(const k of res.keys){ try{ const r=await window.storage.get(k,true); if(r) fn(JSON.parse(r.value)); }catch(e){} } }catch(e){}
-}
-async function loadCommunityApproved(){ await eachCommunityItem(it=>{ if(it.status==='approved') addCommunityMonkey(it); }); }
-loadCommunityApproved();
-
-/* admin modal */
-function acard(it, actions){ const d=document.createElement('div'); d.className='acard';
-  const im=document.createElement('img'); im.src=it.img; d.appendChild(im);
-  const row=document.createElement('div'); row.className='arow';
-  actions.forEach(a=>{ const b=document.createElement('button'); b.className=a.cls; b.textContent=a.label;
-    b.onclick=a.fn; row.appendChild(b); }); d.appendChild(row); return d; }
-async function setStatus(id,status){ try{ const r=await window.storage.get('community:item:'+id,true);
-  if(!r) return; const it=JSON.parse(r.value); it.status=status;
-  await window.storage.set('community:item:'+id,JSON.stringify(it),true); }catch(e){} }
-async function removeItem(id){ try{ await window.storage.delete('community:item:'+id,true); }catch(e){} }
-async function renderAdmin(){
-  const pend=document.getElementById('adminPending'), appr=document.getElementById('adminApproved');
-  pend.innerHTML=''; appr.innerHTML=''; let np=0,na=0;
-  await eachCommunityItem(it=>{
-    if(it.status==='pending'){ np++; pend.appendChild(acard(it,[
-      {label:'Approve',cls:'ok',fn:async()=>{ await setStatus(it.id,'approved'); addCommunityMonkey(it); renderAdmin(); }},
-      {label:'Reject',cls:'no',fn:async()=>{ await removeItem(it.id); renderAdmin(); }} ])); }
-    else if(it.status==='approved'){ na++; appr.appendChild(acard(it,[
-      {label:'Remove',cls:'no',fn:async()=>{ await removeItem(it.id); renderAdmin(); }} ])); }
-  });
-  document.getElementById('pendingEmpty').style.display=np?'none':'block';
-  document.getElementById('approvedEmpty').style.display=na?'none':'block';
-}
-document.getElementById('adminBtn').onclick=()=>{ document.getElementById('adminModal').style.display='flex';
-  if(!HAS_STORE){ document.getElementById('pendingEmpty').textContent='Storage unavailable here \u2014 works on the hosted backend.'; }
-  renderAdmin(); };
-document.getElementById('adminClose').onclick=()=>document.getElementById('adminModal').style.display='none';
-document.getElementById('adminModal').onclick=e=>{ if(e.target.id==='adminModal') e.target.style.display='none'; };
-if(location.hash==='#admin') document.getElementById('adminBtn').click();
-
 /* upload */
-let lastUploadSrc=null;
 document.getElementById('uploadBtn').onclick=()=>document.getElementById('fileInput').click();
 document.getElementById('fileInput').onchange=e=>{ const f=e.target.files[0]; if(!f)return;
   const r=new FileReader(); r.onload=()=>{ const img=new Image();
-    img.onload=()=>{ document.querySelectorAll('.mk').forEach(m=>m.classList.remove('on')); setBackground(img);
-      lastUploadSrc=r.result;
-      document.getElementById('submitCommunity').style.display='block';
-      document.getElementById('communityHint').style.display='block'; };
+    img.onload=()=>{ document.querySelectorAll('.mk').forEach(m=>m.classList.remove('on')); setBackground(img); };
     img.src=r.result; }; r.readAsDataURL(f); };
 
 /* filters */
@@ -641,43 +487,6 @@ document.getElementById('copyCap').onclick=async()=>{
   catch(e){ toast('Select the caption to copy'); } };
 document.getElementById('rollCap').onclick=rollCaption;
 rollCaption();
-
-/* OAuth connect (runs on your hosted site; redirects to the platform's real consent screen) */
-function connectOAuth(p){ const c=OAUTH.providers[p]; if(!c) return;
-  if(!c.clientId){ toast('Add your '+p+' client ID to the OAUTH config'); return; }
-  const state=p+'_'+Math.random().toString(36).slice(2);
-  const u=new URL(c.authUrl);
-  u.searchParams.set('client_id',c.clientId);
-  u.searchParams.set('redirect_uri',OAUTH.redirectUri);
-  u.searchParams.set('response_type','code');
-  u.searchParams.set('scope',c.scope);
-  u.searchParams.set('state',state);
-  location.href=u.toString();
-}
-document.getElementById('connectRow').addEventListener('click',e=>{ const b=e.target.closest('button');
-  if(b) connectOAuth(b.dataset.p); });
-function markConnected(p){ const b=document.querySelector('#connectRow button[data-p="'+p+'"]');
-  if(b && !b.classList.contains('on')){ b.classList.add('on'); b.textContent='\u2713 '+b.textContent; } }
-(function handleOAuthReturn(){
-  const q=new URLSearchParams(location.search), code=q.get('code'), st=q.get('state'); if(!code) return;
-  const p=(st||'').split('_')[0];
-  if(OAUTH.backendUrl){
-    fetch(OAUTH.backendUrl,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({provider:p,code,redirectUri:OAUTH.redirectUri})})
-      .then(r=>r.json()).then(()=>{ connected[p]=true; markConnected(p); toast(p+' connected'); })
-      .catch(()=>toast('Connect failed \u2014 check your backend'));
-  } else { toast('Got the auth code \u2014 set OAUTH.backendUrl to finish on your server'); }
-})();
-document.getElementById('shareBtn').onclick=async()=>{
-  const caption=document.getElementById('caption').value;
-  try{ const {blob,ext}=await exportBlob();
-    const file=new File([blob],'monkey-meme.'+ext,{type:blob.type});
-    if(navigator.canShare&&navigator.canShare({files:[file]})){
-      await navigator.share({files:[file],text:caption,title:'Monkey meme'}); return; } }
-  catch(e){ if(e&&e.name==='AbortError') return; }
-  const {url,ext}=exportData(); const a=document.createElement('a'); a.href=url; a.download='monkey-meme.'+ext; a.click();
-  try{ await navigator.clipboard.writeText(caption); }catch(e){}
-  toast('Share sheet unavailable \u2014 saved image + copied caption'); };
 
 let toastT;
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
