@@ -1,8 +1,11 @@
-<!-- MonkeyNet — Monkey Wall (Supabase-backed, free; falls back to local demo) -->
+<!-- MonkeyNet — Monkey Gallery (Supabase-backed, free; falls back to local demo) -->
+<!-- Identity: a shared GALLERY you hang monkeys in. Not a feed. No accounts, no algorithm.
+     Optional throwaway handle + caption. Monkeys can be made in MonkeyMaker and sent straight here.
+     Moderation happens in the Supabase dashboard (flip the `hidden` flag) — no admin UI on the page. -->
 <meta charset="utf-8">
 <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACAklEQVR4nN1Xu23DMBB9DDKBgUyQwgbUphO8AAdQa1fqUmgSFU6lNFKrAbSAoyJAWgNWkQkMOCMwRXwEdSZpyZSaPMCAefy84/F+Av4bujJVY9Y/zEE+RgkRSponcY9MyghNc+ityerWyROkAJFLGXnXNc3BqcRjiAJE/vT8osen7y8A6MmkBLK6te6/2wfo9iYRjW0y/lTBCkyFu54gT2IlxQqNOgIAFusUAKCUws/Hu1UmxQpIoLgvTGoBIa79zCYzcZcFsroVSKDf9Lwv9Nzp7fNKBgCNOlojYZI8QGHInY8iYtYwvBx8yQf9OUpIsyUiE7Yw8xETJnNCTjaEHJihFtgwey0gbF43+n+1qwYpEZyK6WCT3BxndSuyuhWDU3GexIp+531h3cTJh8ClRE8Bs7xKGaHaVc43HkPug1bAvNVyW4jlthA2kiFO5wPf/8DJ+Qbf+5ngTsfHLuhMKGWkmwafQuRcUkZquS168z7SrkwVpWqzOXFGAZHzBpPyO5Hfsg7N03raT3DWAiLmheTvoKJ3OFeaz+VJrLK6FYt1emVRqwWyuhVNc/BWMW6Z4FQ8Jra7MlVm6+3bc+tcbQFaQEnI9nHRlanKk1j5LDMW1kNs/b7rxr4bDrGq9xY+J7tFNPRJg81o1gvTy11yjqCG5LwvFMU1J6FxtavgKmoA8AtYgj+GI+VMFwAAAABJRU5ErkJggg==">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Monkey Wall · MonkeyNet</title>
+<title>Monkey Gallery · MonkeyNet</title>
 <style>
   :root{--bg:#12160F;--panel:#1B231D;--panel2:#252E27;--ink:#F5F2E9;--muted:#AFC1B4;
     --banana:#F2D479;--jungle:#67C389;--line:#37463C;--danger:#E5775F}
@@ -29,7 +32,9 @@
   .drop:hover{border-color:var(--banana)}
   .drop.has{padding:0;border-style:solid;overflow:hidden}
   .drop.has img{width:100%;max-height:320px;object-fit:contain;display:block;background:#000}
-  textarea{width:100%;margin-top:12px;background:var(--panel2);color:var(--ink);border:1px solid var(--line);
+  input.handle{width:100%;margin-top:12px;background:var(--panel2);color:var(--ink);border:1px solid var(--line);
+    border-radius:10px;padding:10px;font-size:14px;font-family:inherit}
+  textarea{width:100%;margin-top:10px;background:var(--panel2);color:var(--ink);border:1px solid var(--line);
     border-radius:10px;padding:10px;font-size:14px;font-family:inherit;resize:vertical;min-height:54px}
   .row{display:flex;gap:10px;margin-top:12px;align-items:center}
   .btn{padding:11px 18px;border:none;border-radius:10px;font-weight:800;font-size:14px;cursor:pointer}
@@ -39,13 +44,14 @@
   .spacer{margin-left:auto;color:var(--muted);font-size:12px}
 
   .post{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:16px}
-  .post img{width:100%;display:block;background:#000}
+  .post img.shot{width:100%;display:block;background:#000}
   .post .meta{padding:12px 14px}
   .post .cap{font-size:15px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
-  .post .time{color:var(--muted);font-size:12px;margin-top:6px}
-  .feedhead{display:flex;align-items:center;margin:6px 0 14px}
-  .feedhead h2{font-size:16px;margin:0;letter-spacing:.04em}
-  .feedhead .count{margin-left:auto;color:var(--muted);font-size:13px}
+  .post .who{color:var(--banana);font-size:13px;font-weight:800;margin-top:8px}
+  .post .who .anon{color:var(--muted);font-weight:600}
+  .wallhead{display:flex;align-items:center;margin:6px 0 14px}
+  .wallhead h2{font-size:16px;margin:0;letter-spacing:.04em}
+  .wallhead .sub{margin-left:auto;color:var(--muted);font-size:12px}
   .empty{color:var(--muted);text-align:center;padding:40px 0;font-size:14px}
   .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);
     padding:11px 18px;border-radius:999px;font-weight:700;font-size:14px;opacity:0;transition:.25s;
@@ -54,7 +60,7 @@
 </style>
 
 <div class="topbar">
-  <div class="brand">Monkey<span class="g">Wall</span></div>
+  <div class="brand">Monkey<span class="g">Gallery</span></div>
   <a href="index.html">Hub</a>
   <a href="monkey-maker.html">Maker</a>
   <span class="sp" id="modeTag">·</span>
@@ -68,49 +74,53 @@
       <span id="dropText">Tap to add a monkey 🐵 &nbsp;·&nbsp; or make one in MonkeyMaker first</span>
       <input type="file" id="file" accept="image/*" hidden>
     </div>
-    <textarea id="cap" placeholder="say something simian..."></textarea>
+    <input class="handle" id="handle" maxlength="24" placeholder="name (optional)">
+    <textarea id="cap" placeholder="caption your monkey..."></textarea>
     <div class="row">
-      <button class="btn y" id="post" disabled>Post to the wall</button>
+      <button class="btn y" id="post" disabled>Hang it up</button>
       <a class="btn o" href="monkey-maker.html">Make a monkey</a>
       <span class="spacer" id="status"></span>
     </div>
   </div>
 
-  <div class="feedhead"><h2>THE COLONY</h2><span class="count" id="count"></span></div>
-  <div id="feed"><div class="empty" id="loading">Loading the canopy…</div></div>
+  <div class="wallhead"><h2>THE GALLERY</h2><span class="sub">hang a monkey · it stays up</span></div>
+  <div id="feed"><div class="empty" id="loading">Loading the gallery…</div></div>
 </div>
 <div class="toast" id="toast"></div>
 
 <script>
 /* ============ CONFIG ============
    Paste these from your Supabase project (Settings → API) to go public + free.
-   Leave blank to run in local demo mode (shared storage; visible in preview only). */
-const SUPABASE_URL  = '';   // e.g. https://abcdefgh.supabase.co
-const SUPABASE_ANON = '';   // the public "anon" key (safe to expose; RLS protects your data)
+   Leave blank to run in local demo mode (this browser only). */
+const SUPABASE_URL  = 'https://ucopubxejatgjgqmqnlu.supabase.co';
+const SUPABASE_ANON = 'sb_publishable_P1clPSQ1JhkD2_yLtCpXFQ_BYN0Hhc6';   // the public "publishable" key (safe to expose; RLS protects your data)
 const BUCKET = 'monkeys';
+/* Moderation is done in the Supabase dashboard: Table editor → set a monkey's `hidden`
+   column to true (or delete the row). There is deliberately no admin control on this page. */
 /* ================================ */
 
 const useSupa = !!(SUPABASE_URL && SUPABASE_ANON);
 const HAS_LOCAL = (typeof window!=='undefined') && !!window.storage;
 
-/* ---- backend abstraction: returns/accepts {caption, src, ts} ---- */
+/* ---- backend abstraction: works with {handle, caption, src, ts} ---- */
 const Store = {
   async list(){
     if(useSupa){
-      const r=await fetch(`${SUPABASE_URL}/rest/v1/posts?select=*&order=created_at.desc&limit=100`,
+      const r=await fetch(`${SUPABASE_URL}/rest/v1/posts?select=*&hidden=eq.false&order=created_at.desc&limit=200`,
         {headers:{apikey:SUPABASE_ANON, Authorization:'Bearer '+SUPABASE_ANON}});
       if(!r.ok) throw new Error('list failed'); const rows=await r.json();
-      return rows.map(p=>({caption:p.caption||'', src:p.image_url, ts:new Date(p.created_at).getTime()}));
+      return rows.map(p=>({handle:p.handle||'', caption:p.caption||'', src:p.image_url, ts:new Date(p.created_at).getTime()}));
     }
     if(HAS_LOCAL){ const out=[];
-      try{ const res=await window.storage.list('wall:item:', true);
+      try{ const res=await window.storage.list('gallery:item:', true);
         if(res&&res.keys) for(const k of res.keys){ try{ const g=await window.storage.get(k,true);
-          if(g){ const it=JSON.parse(g.value); out.push({caption:it.caption,src:it.img,ts:it.ts}); } }catch(e){} } }catch(e){}
+          if(g){ const it=JSON.parse(g.value); if(it.hidden) continue;
+            out.push({handle:it.handle||'', caption:it.caption, src:it.img, ts:it.ts}); } }catch(e){} } }catch(e){}
       return out.sort((a,b)=>b.ts-a.ts);
     }
     return [];
   },
-  async add(caption, canvas){
+  async add(handle, caption, canvas){
     if(useSupa){
       const blob=await new Promise(res=>canvas.toBlob(res,'image/jpeg',0.82));
       const path=Date.now()+'-'+Math.random().toString(36).slice(2)+'.jpg';
@@ -122,14 +132,14 @@ const Store = {
       const ins=await fetch(`${SUPABASE_URL}/rest/v1/posts`,
         {method:'POST', headers:{apikey:SUPABASE_ANON, Authorization:'Bearer '+SUPABASE_ANON,
           'Content-Type':'application/json', Prefer:'return=minimal'},
-          body:JSON.stringify({caption, image_url})});
+          body:JSON.stringify({handle, caption, image_url})});
       if(!ins.ok) throw new Error('insert failed');
       return;
     }
     if(HAS_LOCAL){
       const img=canvas.toDataURL('image/jpeg',0.72);
       const id='w'+Date.now()+Math.floor(Math.random()*1000);
-      await window.storage.set('wall:item:'+id, JSON.stringify({caption,img,ts:Date.now()}), true);
+      await window.storage.set('gallery:item:'+id, JSON.stringify({handle,caption,img,ts:Date.now()}), true);
       return;
     }
     throw new Error('no backend');
@@ -141,53 +151,70 @@ const banner=document.getElementById('banner'), modeTag=document.getElementById(
 if(useSupa){ modeTag.textContent='live'; }
 else { modeTag.textContent='demo';
   banner.style.display='block';
-  banner.innerHTML='<b>Local demo mode.</b> Posts are stored in this browser session so you can try the flow. '
-    +'Add your Supabase URL + anon key in the CONFIG block to make it a real public wall (free).'; }
+  banner.innerHTML='<b>Local demo mode.</b> Monkeys are hung in this browser only so you can try it. '
+    +'Add your Supabase URL + anon key in the CONFIG block to make it a real shared gallery (free).'; }
 
 /* ---- compose ---- */
 let pickedCanvas=null;
 const drop=document.getElementById('drop'), fileEl=document.getElementById('file'),
       postBtn=document.getElementById('post'), capEl=document.getElementById('cap'),
-      statusEl=document.getElementById('status');
-drop.onclick=()=>fileEl.click();
-fileEl.onchange=e=>{ const f=e.target.files[0]; if(!f) return;
-  const r=new FileReader(); r.onload=()=>{ const im=new Image(); im.onload=()=>{
+      handleEl=document.getElementById('handle'), statusEl=document.getElementById('status');
+
+/* load an image source into the composer as the picked monkey */
+function loadIntoComposer(src, caption){
+  const im=new Image(); im.onload=()=>{
     let w=im.width,h=im.height; const s=Math.min(1,1000/Math.max(w,h)); w=Math.round(w*s); h=Math.round(h*s);
     const c=document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').drawImage(im,0,0,w,h);
     pickedCanvas=c;
     drop.classList.add('has'); drop.innerHTML=''; const prev=new Image(); prev.src=c.toDataURL('image/jpeg',0.85);
     drop.appendChild(prev); drop.appendChild(fileEl);
     postBtn.disabled=false;
-  }; im.src=r.result; }; r.readAsDataURL(f); };
+    if(caption && !capEl.value) capEl.value=caption;
+  }; im.src=src;
+}
+
+drop.onclick=()=>fileEl.click();
+fileEl.onchange=e=>{ const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader(); r.onload=()=>loadIntoComposer(r.result); r.readAsDataURL(f); };
+
+/* ---- handoff: a monkey sent over from MonkeyMaker ---- */
+(function pickupFromMaker(){
+  let raw; try{ raw=sessionStorage.getItem('mk:handoff'); }catch(e){ return; }
+  if(!raw) return;
+  try{ sessionStorage.removeItem('mk:handoff'); }catch(e){}
+  let data; try{ data=JSON.parse(raw); }catch(e){ return; }
+  if(!data || !data.img) return;
+  loadIntoComposer(data.img, (data.caption||'').trim());
+  toast('Monkey loaded from the Maker 🐵');
+})();
 
 postBtn.onclick=async()=>{
   if(!pickedCanvas) return;
-  postBtn.disabled=true; statusEl.textContent='Posting…';
-  try{ await Store.add(capEl.value.trim(), pickedCanvas);
-    statusEl.textContent=''; toast('Posted to the wall 🐵');
-    pickedCanvas=null; capEl.value='';
+  postBtn.disabled=true; statusEl.textContent='Hanging…';
+  try{ await Store.add(handleEl.value.trim().slice(0,24), capEl.value.trim(), pickedCanvas);
+    statusEl.textContent=''; toast('Up in the gallery 🐵');
+    pickedCanvas=null; capEl.value=''; handleEl.value='';
     drop.classList.remove('has'); drop.innerHTML='<span id="dropText">Tap to add a monkey 🐵</span>'; drop.appendChild(fileEl);
     loadFeed();
-  }catch(e){ statusEl.textContent=''; postBtn.disabled=false; toast('Post failed — check your Supabase setup'); }
+  }catch(e){ statusEl.textContent=''; postBtn.disabled=false; toast('Could not hang it — check your Supabase setup'); }
 };
 
-/* ---- feed ---- */
-function rel(ts){ const s=Math.floor((Date.now()-ts)/1000);
-  if(s<60) return 'just now'; if(s<3600) return Math.floor(s/60)+'m ago';
-  if(s<86400) return Math.floor(s/3600)+'h ago'; return Math.floor(s/86400)+'d ago'; }
+/* ---- the gallery ---- */
 async function loadFeed(){
   const feed=document.getElementById('feed');
   try{ const posts=await Store.list();
-    document.getElementById('count').textContent=posts.length+(posts.length===1?' monkey':' monkeys');
-    if(!posts.length){ feed.innerHTML='<div class="empty">No monkeys yet. Be the first to post 🍌</div>'; return; }
+    if(!posts.length){ feed.innerHTML='<div class="empty">Empty gallery. Hang the first monkey 🍌</div>'; return; }
     feed.innerHTML='';
     posts.forEach(p=>{ const d=document.createElement('div'); d.className='post';
-      const im=document.createElement('img'); im.src=p.src; im.loading='lazy'; d.appendChild(im);
+      const im=document.createElement('img'); im.className='shot'; im.src=p.src; im.loading='lazy'; d.appendChild(im);
       const m=document.createElement('div'); m.className='meta';
       if(p.caption){ const c=document.createElement('div'); c.className='cap'; c.textContent=p.caption; m.appendChild(c); }
-      const t=document.createElement('div'); t.className='time'; t.textContent=rel(p.ts); m.appendChild(t);
+      const who=document.createElement('div'); who.className='who';
+      if(p.handle){ who.textContent='🐵 '+p.handle; }
+      else { who.innerHTML='<span class="anon">🐵 some monkey</span>'; }
+      m.appendChild(who);
       d.appendChild(m); feed.appendChild(d); });
-  }catch(e){ feed.innerHTML='<div class="empty">Could not load the wall.</div>'; }
+  }catch(e){ feed.innerHTML='<div class="empty">Could not load the gallery.</div>'; }
 }
 loadFeed();
 

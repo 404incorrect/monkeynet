@@ -226,8 +226,10 @@
         </div>
 
         <h3 style="margin-top:18px">Post it now</h3>
-        <button class="btn gold" id="downloadBtn">Download</button>
-        <div class="hint">Save the meme, then post it wherever you like.</div>
+        <button class="btn gold" id="toGalleryBtn">🐵 Post to the Gallery</button>
+        <div class="hint">Sends this monkey (and caption) straight to the Monkey Gallery.</div>
+        <button class="btn ghost" id="downloadBtn" style="margin-top:10px">Download</button>
+        <div class="hint">Or just save the meme and post it wherever you like.</div>
       </div>
     </div>
   </div>
@@ -482,6 +484,15 @@ function exportBlob(){ const keep=selected; selected=null; render();
 document.getElementById('downloadBtn').onclick=()=>{ const {url,ext}=exportData();
   const a=document.createElement('a'); a.href=url; a.download='monkey-meme.'+ext; a.click();
   toast('Saved monkey-meme.'+ext); };
+document.getElementById('toGalleryBtn').onclick=()=>{
+  // render a compact JPEG and hand it (plus caption) to the Gallery composer
+  const keep=selected; selected=null; render();
+  const img=cv.toDataURL('image/jpeg',0.9);
+  selected=keep; render();
+  const caption=document.getElementById('caption').value.trim();
+  try{ sessionStorage.setItem('mk:handoff', JSON.stringify({img, caption})); }
+  catch(e){ toast('Monkey too big to send — try Download instead'); return; }
+  location.href='monkey-gallery.html'; };
 document.getElementById('copyCap').onclick=async()=>{
   try{ await navigator.clipboard.writeText(document.getElementById('caption').value); toast('Caption copied'); }
   catch(e){ toast('Select the caption to copy'); } };
