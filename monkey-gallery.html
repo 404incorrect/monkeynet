@@ -177,8 +177,10 @@ drop.onclick=()=>fileEl.click();
 fileEl.onchange=e=>{ const f=e.target.files[0]; if(!f) return;
   const r=new FileReader(); r.onload=()=>loadIntoComposer(r.result); r.readAsDataURL(f); };
 
-/* ---- handoff: a monkey sent over from MonkeyMaker ---- */
-(function pickupFromMaker(){
+/* ---- handoff: a monkey sent over from MonkeyMaker ----
+   NOTE: called at the very end of the script (not here) so the composer is
+   fully wired and toast()/toastT are initialized before it can run. */
+function pickupFromMaker(){
   let raw; try{ raw=sessionStorage.getItem('mk:handoff'); }catch(e){ return; }
   if(!raw) return;
   try{ sessionStorage.removeItem('mk:handoff'); }catch(e){}
@@ -186,7 +188,7 @@ fileEl.onchange=e=>{ const f=e.target.files[0]; if(!f) return;
   if(!data || !data.img) return;
   loadIntoComposer(data.img, (data.caption||'').trim());
   toast('Monkey loaded from the Maker 🐵');
-})();
+}
 
 postBtn.onclick=async()=>{
   if(!pickedCanvas) return;
@@ -220,4 +222,7 @@ loadFeed();
 
 let toastT; function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
   clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2200); }
+
+/* everything is wired now — safe to pick up a monkey handed over from the Maker */
+pickupFromMaker();
 </script>
