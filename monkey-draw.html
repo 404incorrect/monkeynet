@@ -1,0 +1,224 @@
+<!-- MonkeyNet — MonkeyDraw: a freehand paint pad. Draw a monkey, send it straight to the Gallery. -->
+<!-- Hands off to monkey-gallery.html via sessionStorage['mk:handoff'] = {img, caption} — the same
+     pipeline MonkeyMaker uses, so the Gallery composer picks it up automatically. -->
+<meta charset="utf-8">
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACAklEQVR4nN1Xu23DMBB9DDKBgUyQwgbUphO8AAdQa1fqUmgSFU6lNFKrAbSAoyJAWgNWkQkMOCMwRXwEdSZpyZSaPMCAefy84/F+Av4bujJVY9Y/zEE+RgkRSponcY9MyghNc+ityerWyROkAJFLGXnXNc3BqcRjiAJE/vT8osen7y8A6MmkBLK6te6/2wfo9iYRjW0y/lTBCkyFu54gT2IlxQqNOgIAFusUAKCUws/Hu1UmxQpIoLgvTGoBIa79zCYzcZcFsroVSKDf9Lwv9Nzp7fNKBgCNOlojYZI8QGHInY8iYtYwvBx8yQf9OUpIsyUiE7Yw8xETJnNCTjaEHJihFtgwey0gbF43+n+1qwYpEZyK6WCT3BxndSuyuhWDU3GexIp+531h3cTJh8ClRE8Bs7xKGaHaVc43HkPug1bAvNVyW4jlthA2kiFO5wPf/8DJ+Qbf+5ngTsfHLuhMKGWkmwafQuRcUkZquS168z7SrkwVpWqzOXFGAZHzBpPyO5Hfsg7N03raT3DWAiLmheTvoKJ3OFeaz+VJrLK6FYt1emVRqwWyuhVNc/BWMW6Z4FQ8Jra7MlVm6+3bc+tcbQFaQEnI9nHRlanKk1j5LDMW1kNs/b7rxr4bDrGq9xY+J7tFNPRJg81o1gvTy11yjqCG5LwvFMU1J6FxtavgKmoA8AtYgj+GI+VMFwAAAABJRU5ErkJggg==">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>MonkeyDraw · MonkeyNet</title>
+<style>
+  :root{--bg:#12160F;--panel:#1B231D;--panel2:#252E27;--ink:#F5F2E9;--muted:#AFC1B4;
+    --banana:#F2D479;--jungle:#67C389;--line:#37463C;--danger:#E5775F}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  a{color:inherit;text-decoration:none}
+  .topbar{position:sticky;top:0;z-index:5;background:rgba(10,14,11,.86);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);padding:12px 20px;display:flex;align-items:center;gap:16px}
+  .brand{font-family:Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif;font-size:22px;
+    text-transform:uppercase;letter-spacing:.5px}
+  .brand .g{color:var(--jungle)}
+  .topbar a{color:var(--muted);font-weight:700;font-size:14px}
+  .topbar a:hover{color:var(--banana)}
+  .topbar .sp{margin-left:auto;color:var(--banana);font-weight:700;font-size:14px}
+  .wrap{max-width:680px;margin:0 auto;padding:22px 16px 80px}
+
+  .stage{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px}
+  .pad{position:relative;width:100%;aspect-ratio:1;border-radius:12px;overflow:hidden;
+    border:1px solid var(--line);box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
+  canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:crosshair}
+
+  .tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px}
+  .swatches{display:flex;gap:7px;flex-wrap:wrap}
+  .sw{width:26px;height:26px;border-radius:50%;border:2px solid rgba(255,255,255,.15);cursor:pointer;
+    padding:0;transition:transform .1s}
+  .sw:hover{transform:scale(1.12)}
+  .sw.on{border-color:var(--banana);box-shadow:0 0 0 2px var(--banana)}
+  .sw.pick{position:relative;overflow:hidden;
+    background:conic-gradient(from 0deg,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)}
+  .sw.pick input{position:absolute;inset:-6px;opacity:0;cursor:pointer;width:200%;height:200%}
+
+  .group{display:flex;align-items:center;gap:8px}
+  .divider{width:1px;height:26px;background:var(--line)}
+  .lbl{color:var(--muted);font-size:12px;font-weight:700}
+  input[type=range]{accent-color:var(--banana);width:110px}
+  .dot{border-radius:50%;background:var(--ink);flex:0 0 auto}
+
+  .btn{padding:9px 14px;border:none;border-radius:10px;font-weight:800;font-size:13.5px;cursor:pointer}
+  .btn.y{background:var(--banana);color:var(--bg)}
+  .btn.o{background:var(--panel2);color:var(--ink);border:1px solid var(--line)}
+  .btn.o.on{border-color:var(--banana);color:var(--banana)}
+  .btn:disabled{opacity:.5;cursor:default}
+
+  input.handle,textarea{width:100%;background:var(--panel2);color:var(--ink);border:1px solid var(--line);
+    border-radius:10px;padding:10px;font-size:14px;font-family:inherit}
+  textarea{margin-top:10px;resize:vertical;min-height:52px}
+  .composer{margin-top:16px}
+  .row{display:flex;gap:10px;margin-top:12px;align-items:center;flex-wrap:wrap}
+  .spacer{margin-left:auto;color:var(--muted);font-size:12px}
+  .hint{color:var(--muted);font-size:12px;margin-top:8px;line-height:1.5}
+
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);
+    padding:11px 18px;border-radius:999px;font-weight:700;font-size:14px;opacity:0;transition:.25s;
+    pointer-events:none;z-index:9}
+  .toast.show{opacity:1}
+</style>
+
+<div class="topbar">
+  <div class="brand">Monkey<span class="g">Draw</span></div>
+  <a href="index.html">Hub</a>
+  <a href="monkey-maker.html">Maker</a>
+  <a href="monkey-gallery.html">Gallery</a>
+  <span class="sp">draw it 🖍️</span>
+</div>
+
+<div class="wrap">
+  <div class="stage">
+    <div class="pad" id="pad">
+      <canvas id="cv" width="1024" height="1024"></canvas>
+    </div>
+
+    <div class="tools">
+      <div class="swatches" id="swatches"></div>
+      <button class="sw pick" title="Custom color"><input type="color" id="picker" value="#7A4E2D"></button>
+
+      <div class="divider"></div>
+
+      <div class="group">
+        <span class="lbl">Size</span>
+        <input type="range" id="size" min="1" max="70" value="14">
+        <span class="dot" id="dot"></span>
+      </div>
+
+      <div class="divider"></div>
+
+      <button class="btn o" id="brushBtn">🖌️ Brush</button>
+      <button class="btn o" id="eraseBtn">🧽 Eraser</button>
+      <button class="btn o" id="undoBtn">↩ Undo</button>
+      <button class="btn o" id="clearBtn">🗑 Clear</button>
+
+      <div class="group" style="margin-left:auto">
+        <span class="lbl">Paper</span>
+        <div class="swatches" id="papers"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="composer">
+    <input class="handle" id="handle" maxlength="24" placeholder="name (optional)">
+    <textarea id="cap" placeholder="caption your monkey..."></textarea>
+    <div class="row">
+      <button class="btn y" id="toGallery">🐵 Hang it in the Gallery</button>
+      <button class="btn o" id="download">⬇ Save PNG</button>
+      <span class="spacer">no accounts · it just goes up</span>
+    </div>
+    <div class="hint">Draw a monkey above, then hang it in the Gallery — your drawing and caption ride straight over to the composer.</div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
+const pad=document.getElementById('pad');
+
+/* ---- state ---- */
+let color='#7A4E2D';        // brush color
+let paper='#F5F2E9';        // canvas background (composited in at export)
+let size=14;
+let erasing=false;
+let drawing=false, last=null;
+
+/* ---- palettes ---- */
+const COLORS=['#12160F','#7A4E2D','#B07C4E','#F2D479','#E5775F','#67C389','#5F9BE5','#C58FE5','#F5F2E9'];
+const PAPERS=['#F5F2E9','#F2D479','#C7E7CF','#F6C7C7','#12160F','#252E27'];
+
+const swWrap=document.getElementById('swatches');
+COLORS.forEach((c,i)=>{ const b=document.createElement('button'); b.className='sw'+(c===color?' on':'');
+  b.style.background=c; b.title=c; b.dataset.c=c;
+  b.onclick=()=>{ setColor(c); erasing=false; syncTools(); };
+  swWrap.appendChild(b); });
+
+const paperWrap=document.getElementById('papers');
+PAPERS.forEach(c=>{ const b=document.createElement('button'); b.className='sw'+(c===paper?' on':'');
+  b.style.background=c; b.title=c; b.dataset.p=c;
+  b.onclick=()=>{ paper=c; pad.style.background=c; cv.style.background=c;
+    [...paperWrap.children].forEach(x=>x.classList.toggle('on',x.dataset.p===c)); };
+  paperWrap.appendChild(b); });
+
+function setColor(c){ color=c;
+  [...swWrap.children].forEach(x=>x.classList.toggle('on',x.dataset.c===c));
+  document.getElementById('picker').value=/^#[0-9a-f]{6}$/i.test(c)?c:'#7A4E2D'; }
+
+document.getElementById('picker').oninput=e=>{ setColor(e.target.value); erasing=false; syncTools(); };
+
+/* ---- size ---- */
+const sizeEl=document.getElementById('size'), dot=document.getElementById('dot');
+function syncSize(){ size=+sizeEl.value; const d=Math.max(4,Math.min(30,size));
+  dot.style.width=d+'px'; dot.style.height=d+'px';
+  dot.style.background=erasing?'var(--muted)':color; }
+sizeEl.oninput=syncSize;
+
+/* ---- tool toggles ---- */
+const brushBtn=document.getElementById('brushBtn'), eraseBtn=document.getElementById('eraseBtn');
+function syncTools(){ brushBtn.classList.toggle('on',!erasing); eraseBtn.classList.toggle('on',erasing);
+  cv.style.cursor=erasing?'cell':'crosshair'; syncSize(); }
+brushBtn.onclick=()=>{ erasing=false; syncTools(); };
+eraseBtn.onclick=()=>{ erasing=true; syncTools(); };
+
+/* ---- undo stack (snapshots of the transparent draw layer) ---- */
+const undoStack=[]; const UNDO_MAX=25;
+function snapshot(){ try{ undoStack.push(ctx.getImageData(0,0,cv.width,cv.height));
+  if(undoStack.length>UNDO_MAX) undoStack.shift(); }catch(e){} }
+document.getElementById('undoBtn').onclick=()=>{ if(!undoStack.length) return;
+  const img=undoStack.pop(); ctx.putImageData(img,0,0); };
+document.getElementById('clearBtn').onclick=()=>{ snapshot(); ctx.clearRect(0,0,cv.width,cv.height); toast('Cleared'); };
+
+/* ---- pointer → canvas coords ---- */
+function pos(e){ const r=cv.getBoundingClientRect();
+  return { x:(e.clientX-r.left)/r.width*cv.width, y:(e.clientY-r.top)/r.height*cv.height }; }
+
+function stroke(a,b){
+  ctx.globalCompositeOperation = erasing ? 'destination-out' : 'source-over';
+  ctx.strokeStyle = color; ctx.lineWidth = size; ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+}
+
+cv.addEventListener('pointerdown',e=>{ e.preventDefault();
+  try{ cv.setPointerCapture(e.pointerId); }catch(_){}
+  snapshot(); drawing=true; last=pos(e); stroke(last,{x:last.x+.01,y:last.y}); });
+cv.addEventListener('pointermove',e=>{ if(!drawing) return; e.preventDefault();
+  const p=pos(e); stroke(last,p); last=p; });
+function endStroke(){ drawing=false; last=null; }
+cv.addEventListener('pointerup',endStroke);
+cv.addEventListener('pointercancel',endStroke);
+cv.addEventListener('pointerleave',()=>{ if(drawing) endStroke(); });
+
+/* ---- export: composite paper + drawing onto one canvas ---- */
+function flatten(){ const out=document.createElement('canvas'); out.width=cv.width; out.height=cv.height;
+  const o=out.getContext('2d'); o.fillStyle=paper; o.fillRect(0,0,out.width,out.height);
+  o.drawImage(cv,0,0); return out; }
+function isBlank(){ try{ const d=ctx.getImageData(0,0,cv.width,cv.height).data;
+  for(let i=3;i<d.length;i+=4){ if(d[i]!==0) return false; } return true; }catch(e){ return false; } }
+
+/* ---- download PNG ---- */
+document.getElementById('download').onclick=()=>{ const a=document.createElement('a');
+  a.href=flatten().toDataURL('image/png'); a.download='monkey-drawing.png'; a.click();
+  toast('Saved monkey-drawing.png'); };
+
+/* ---- hand off to the Gallery (same pipeline as MonkeyMaker) ---- */
+document.getElementById('toGallery').onclick=()=>{
+  if(isBlank()){ toast('Draw a monkey first 🐵'); return; }
+  const img=flatten().toDataURL('image/jpeg',0.9);
+  const caption=document.getElementById('cap').value.trim();
+  const handle=document.getElementById('handle').value.trim();
+  try{ sessionStorage.setItem('mk:handoff', JSON.stringify({img, caption, handle})); }
+  catch(e){ toast('Drawing too big to send — try Save PNG instead'); return; }
+  location.href='monkey-gallery.html';
+};
+
+/* ---- toast ---- */
+let toastT; function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2000); }
+
+/* ---- init ---- */
+pad.style.background=paper; cv.style.background=paper; syncTools();
+</script>
