@@ -1,0 +1,176 @@
+<!-- MonkeyNet - MonkeyNews / The Canopy Wire -->
+<!-- Identity: a small newswire that keeps an ear on the WIDER canopy, real monkeys (and a
+     couple of ape cousins) in the real world. Every dispatch is faithful to the human reporting
+     it came from and links out to the source. Playful where the story is playful; sincere and
+     quiet where it isn't. No jokes on the sad ones. -->
+<meta charset="utf-8">
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACAklEQVR4nN1Xu23DMBB9DDKBgUyQwgbUphO8AAdQa1fqUmgSFU6lNFKrAbSAoyJAWgNWkQkMOCMwRXwEdSZpyZSaPMCAefy84/F+Av4bujJVY9Y/zEE+RgkRSponcY9MyghNc+ityerWyROkAJFLGXnXNc3BqcRjiAJE/vT8osen7y8A6MmkBLK6te6/2wfo9iYRjW0y/lTBCkyFu54gT2IlxQqNOgIAFusUAKCUws/Hu1UmxQpIoLgvTGoBIa79zCYzcZcFsroVSKDf9Lwv9Nzp7fNKBgCNOlojYZI8QGHInY8iYtYwvBx8yQf9OUpIsyUiE7Yw8xETJnNCTjaEHJihFtgwey0gbF43+n+1qwYpEZyK6WCT3BxndSuyuhWDU3GexIp+531h3cTJh8ClRE8Bs7xKGaHaVc43HkPug1bAvNVyW4jlthA2kiFO5wPf/8DJ+Qbf+5ngTsfHLuhMKGWkmwafQuRcUkZquS168z7SrkwVpWqzOXFGAZHzBpPyO5Hfsg7N03raT3DWAiLmheTvoKJ3OFeaz+VJrLK6FYt1emVRqwWyuhVNc/BWMW6Z4FQ8Jra7MlVm6+3bc+tcbQFaQEnI9nHRlanKk1j5LDMW1kNs/b7rxr4bDrGq9xY+J7tFNPRJg81o1gvTy11yjqCG5LwvFMU1J6FxtavgKmoA8AtYgj+GI+VMFwAAAABJRU5ErkJggg==">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MonkeyNews · The Canopy Wire · MonkeyNet</title>
+<style>
+  :root{--bg:#12160F;--panel:#1B231D;--panel2:#252E27;--ink:#F5F2E9;--muted:#AFC1B4;
+    --banana:#F2D479;--jungle:#67C389;--line:#37463C;--danger:#E5775F}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  a{color:inherit;text-decoration:none}
+
+  .topbar{position:sticky;top:0;z-index:5;background:rgba(10,14,11,.86);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);padding:12px 20px;display:flex;align-items:center;gap:16px}
+  .brand{font-family:Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif;font-size:22px;
+    text-transform:uppercase;letter-spacing:.5px}
+  .brand .g{color:var(--jungle)}
+  .topbar a{color:var(--muted);font-weight:700;font-size:14px}
+  .topbar a:hover{color:var(--banana)}
+  .topbar .sp{margin-left:auto}
+
+  .wrap{max-width:720px;margin:0 auto;padding:26px 16px 90px}
+
+  /* masthead */
+  .kicker{font-family:ui-sans-serif,system-ui,sans-serif;letter-spacing:.22em;text-transform:uppercase;
+    font-size:12px;color:var(--jungle);font-weight:800;margin-bottom:12px}
+  h1.mast{font-family:Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif;font-size:56px;
+    line-height:.94;margin:0 0 8px;text-transform:uppercase;letter-spacing:.5px}
+  h1.mast .g{color:var(--jungle)}
+  .tag-sub{font-family:Georgia,ui-serif,serif;font-style:italic;color:var(--muted);font-size:18px;margin:0 0 18px}
+  .note{border-left:3px solid var(--banana);padding:8px 0 8px 16px;color:#EBE3CB;font-size:14.5px;
+    line-height:1.6;margin:0 0 8px}
+  .live{display:inline-flex;align-items:center;gap:8px;font-size:11.5px;font-weight:800;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--bg);background:var(--banana);padding:5px 12px;border-radius:999px;margin:14px 0 4px}
+  .live .dot{width:8px;height:8px;border-radius:50%;background:var(--danger);
+    box-shadow:0 0 0 0 rgba(229,119,95,.7);animation:pulse 1.8s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(229,119,95,.7)}70%{box-shadow:0 0 0 7px rgba(229,119,95,0)}100%{box-shadow:0 0 0 0 rgba(229,119,95,0)}}
+
+  .rule{border:none;border-top:1px solid var(--line);margin:22px 0 6px}
+
+  /* dispatches */
+  .wire{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--line);
+    border-radius:14px;padding:20px 22px;margin:16px 0}
+  .wire.play{border-left-color:var(--banana)}
+  .wire.good{border-left-color:var(--jungle)}
+  .wire.warn{border-left-color:var(--danger)}
+  .wire.grave{border-left-color:#6C7A6E;background:#171C15}
+  .beat{font-family:ui-sans-serif,system-ui,sans-serif;letter-spacing:.16em;text-transform:uppercase;
+    font-size:11px;font-weight:800;color:var(--muted);margin-bottom:8px}
+  .wire.play .beat{color:var(--banana)}
+  .wire.good .beat{color:var(--jungle)}
+  .wire.warn .beat{color:var(--danger)}
+  .wire h2{font-family:Georgia,ui-serif,serif;font-size:23px;line-height:1.22;margin:0 0 8px}
+  .dateline{font-size:12.5px;color:var(--muted);font-weight:700;margin-bottom:12px}
+  .dateline b{color:var(--ink)}
+  .wire p{font-family:Georgia,ui-serif,serif;font-size:16px;line-height:1.62;color:#E7E2D4;margin:0 0 14px}
+  .src{display:inline-block;font-family:ui-sans-serif,system-ui,sans-serif;font-size:13px;font-weight:800;
+    color:var(--jungle)}
+  .src:hover{color:var(--banana)}
+
+  footer{margin-top:40px;text-align:center;color:var(--muted);font-size:13.5px;line-height:1.6}
+  footer .em{font-family:Georgia,ui-serif,serif;font-style:italic;color:#D6CFBC}
+</style>
+
+<div class="topbar">
+  <div class="brand">Monkey<span class="g">News</span></div>
+  <a href="index.html">Hub</a>
+  <a href="monkey-draw.html">Draw</a>
+  <a href="monkey-maker.html">Maker</a>
+  <a href="monkey-gallery.html">Gallery</a>
+  <a href="monkeynet-writings.html" class="sp">Writings</a>
+</div>
+
+<div class="wrap">
+  <div class="kicker">MonkeyNet · The Canopy Wire</div>
+  <h1 class="mast">Monkey<span class="g">News</span></h1>
+  <p class="tag-sub">Dispatches from the wider canopy.</p>
+  <p class="note">We mostly make monkeys around here. But there are real ones out there, getting
+  up to things, and it felt wrong not to keep an ear on them. Every dispatch below is faithful to
+  the humans who reported it first, and links straight back to them. Some are heists. Some are
+  goodbyes. We're not going to pretend those read the same.</p>
+  <div class="live"><span class="dot"></span>Live from the canopy</div>
+
+  <hr class="rule">
+
+  <!-- 1 · the fun one -->
+  <article class="wire play">
+    <div class="beat">🍌 Heist</div>
+    <h2>One monkey, one neem tree, and a thirty-minute audit of the fiat system</h2>
+    <div class="dateline"><b>Bulandshahr, Uttar Pradesh, India</b> · May 31, 2026</div>
+    <p>Outside a courthouse, a monkey lifted a lawyer's bag holding roughly ₹2 lakh, carried it up
+    a neem tree, and for about half an hour simply rained the currency notes back down while a
+    crowd below scrambled to catch them. No demands, no manifesto. Just a small primate at the top
+    of a tree, quietly demonstrating that a banknote is only worth something if everyone underneath
+    agrees to keep chasing it. The video, predictably, went everywhere.</p>
+    <a class="src" href="https://www.republicworld.com/viral/mischievous-monkey-showers-rs-2-lakh-from-tree-after-bizarre-heist-in-bulandshahr-video-goes-viral-2026-05-31-126362" target="_blank" rel="noopener">Republic World →</a>
+  </article>
+
+  <!-- 2 · the joyful one -->
+  <article class="wire good">
+    <div class="beat">🐒 New Climbers</div>
+    <h2>Seattle's canopy gets its first colobus in twenty-nine years, arriving all in white</h2>
+    <div class="dateline"><b>Woodland Park Zoo, Seattle</b> · born June 15, announced June 30, 2026</div>
+    <p>A black-and-white colobus monkey was born to parents Mokiki and Lewis, the first colobus
+    the zoo has welcomed in twenty-nine years. Newborns arrive pure white and darken into their
+    adult coloring over their first three months, so for a little while there's a small bright thing
+    up in the branches that hasn't figured out yet how much it's going to change. First climb of
+    many. Welcome, friend.</p>
+    <a class="src" href="https://www.kiro7.com/news/local/woodland-park-zoo-welcomes-new-colobus-monkey-marking-milestone-species/UKTJD4VUJNGLBDJCFGJPJH4GCM/" target="_blank" rel="noopener">KIRO 7 →</a>
+  </article>
+
+  <!-- 3 · the hopeful one -->
+  <article class="wire good">
+    <div class="beat">🌿 Retirement</div>
+    <h2>A hundred and thirty retired research macaques are looking for a better branch to land on</h2>
+    <div class="dateline"><b>United States · CDC</b> · reopened June 20, reported July 1, 2026</div>
+    <p>After public pushback on a plan to send its retired rhesus and pigtail macaques to a single
+    Texas sanctuary, the CDC reopened the process, posting a revised contract opportunity for
+    facilities to bid on housing the 130 animals. It's paperwork, technically. But underneath the
+    paperwork is a straightforward question about where a monkey who has already given a working
+    life gets to spend the rest of it, and whether we can manage to get that part right. Worth
+    watching where they end up.</p>
+    <a class="src" href="https://www.science.org/content/article/after-backlash-cdc-revises-plan-retire-research-monkeys-texas-sanctuary" target="_blank" rel="noopener">Science →</a>
+  </article>
+
+  <!-- 4 · the protective one -->
+  <article class="wire warn">
+    <div class="beat">✋ Hands Off</div>
+    <h2>Someone pointed a laser at a baby monkey for the feed. The zoo is done asking nicely.</h2>
+    <div class="dateline"><b>Ichikawa City Zoo, Japan</b> · June 25, 2026</div>
+    <p>Punch, a baby monkey who'd gone viral, had a laser aimed into his enclosure by a visitor who
+    then posted the clip online. Zoo officials warned it can cause real stress and even blindness,
+    and said anyone caught doing it will be ejected on the spot. This is the extractive feed logic
+    followed all the way to its meanest end: a living thing turned into raw material for a video.
+    A monkey is not content. Punch is not content. Put the laser away.</p>
+    <a class="src" href="https://www.japantimes.co.jp/news/2026/06/25/japan/society/japan-viral-monkey-laser-pointer-target/" target="_blank" rel="noopener">The Japan Times →</a>
+  </article>
+
+  <!-- 5 · the somber one -->
+  <article class="wire grave">
+    <div class="beat">Trafficking</div>
+    <h2>A proboscis monkey turned up in Thailand, far from the only island that is home</h2>
+    <div class="dateline"><b>Thailand</b> · April 2026</div>
+    <p>An injured proboscis monkey, a species that lives nowhere on earth but Borneo, was found
+    near a railway track in Thailand. It needed a finger and part of its tail amputated. There was
+    no CITES paper trail explaining how it crossed a sea and a border, and experts say that absence
+    points to one thing: illegal trade. A canopy is somewhere you climb because you want to. This is
+    the opposite of that: a small life moved against its will, and hurt on the way. We're glad it
+    was found. We wish it had never had to be.</p>
+    <a class="src" href="https://news.mongabay.com/short-article/2026/04/experts-flag-trafficking-after-monkey-endemic-to-borneo-is-found-in-thailand/" target="_blank" rel="noopener">Mongabay →</a>
+  </article>
+
+  <!-- 6 · the grave one -->
+  <article class="wire grave">
+    <div class="beat">The Canopy Itself</div>
+    <h2>Four days of rain took roughly seven percent of the rarest great ape alive</h2>
+    <div class="dateline"><b>Batang Toru, Indonesia</b> · study published June 16, 2026</div>
+    <p>A study in <em>Current Biology</em> found that four days of extreme rain from Cyclone Senyar
+    triggered landslides that killed an estimated 58 Tapanuli orangutans, a critically endangered
+    great ape with fewer than 800 individuals left in the world. Not a monkey; a cousin, up in the
+    same trees. There isn't a lighter way to hold a number like that, so we won't try. The canopy
+    we like to talk about as a metaphor is, for them, an actual forest, and it is getting harder to
+    live in. We're just here to make sure the number gets said out loud.</p>
+    <a class="src" href="https://www.cnn.com/2026/06/16/climate/orangutans-great-ape-killed-cyclone-senyar-extinction-indonesia" target="_blank" rel="noopener">CNN →</a>
+  </article>
+
+  <footer>
+    <p class="em">Some dispatches are heists. Some are goodbyes. The canopy holds both.</p>
+    <p>MonkeyNet · every story links out to the humans who reported it first · 🐵🍌</p>
+  </footer>
+</div>
