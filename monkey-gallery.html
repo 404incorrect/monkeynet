@@ -64,7 +64,6 @@
   <a href="index.html">Hub</a>
   <a href="monkey-draw.html">Draw</a>
   <a href="monkey-maker.html">Maker</a>
-  <span class="sp" id="modeTag">·</span>
 </div>
 
 <div class="wrap">
@@ -148,10 +147,9 @@ const Store = {
   }
 };
 
-/* ---- mode banner ---- */
-const banner=document.getElementById('banner'), modeTag=document.getElementById('modeTag');
-if(useSupa){ modeTag.textContent='live'; }
-else { modeTag.textContent='demo';
+/* ---- demo-mode banner (shown only when Supabase isn't configured) ---- */
+const banner=document.getElementById('banner');
+if(!useSupa){
   banner.style.display='block';
   banner.innerHTML='<b>Local demo mode.</b> Monkeys are hung in this browser only so you can try it. '
     +'Add your Supabase URL + anon key in the CONFIG block to make it a real shared gallery (free).'; }
