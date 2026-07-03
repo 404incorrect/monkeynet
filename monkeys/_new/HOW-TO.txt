@@ -1,0 +1,16 @@
+Drop new monkey pics in this folder (monkeys/_new/).
+
+Accepts .png .jpg .jpeg .gif .webp — any size.
+
+Then run (from the project root):
+    python add-monkeys.py
+
+It will:
+  - resize each pic to max 480px, compress to JPEG
+  - append it as a base64 entry to monkeys.js
+  - delete the source file from monkeys/_new/ once added
+
+The new monkeys then show up in the homepage hero gallery AND the
+"Pick a monkey" grid in the maker (both read from monkeys.js).
+
+Commit & push monkeys.js afterward to deploy.
