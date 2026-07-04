@@ -1,0 +1,379 @@
+<!-- MonkeyNet - MonkeyShrine / A candle for Harambe -->
+<!-- Identity: a quiet, sincere memorial to Harambe (gorilla, 1999-2016). Grave register, not a joke,
+     but it holds MonkeyNet's core thesis: the internet's loud, ridiculous, years-long mourning of him
+     was not ironic. The bit was the grief. Both true at once. Honors the ape/monkey distinction the
+     rest of the site keeps. Candlelight built by hand in CSS/SVG, no external images, so it never
+     breaks. Visitors can light a candle and leave a banana; nothing is counted for anyone but them. -->
+<meta charset="utf-8">
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACAklEQVR4nN1Xu23DMBB9DDKBgUyQwgbUphO8AAdQa1fqUmgSFU6lNFKrAbSAoyJAWgNWkQkMOCMwRXwEdSZpyZSaPMCAefy84/F+Av4bujJVY9Y/zEE+RgkRSponcY9MyghNc+ityerWyROkAJFLGXnXNc3BqcRjiAJE/vT8osen7y8A6MmkBLK6te6/2wfo9iYRjW0y/lTBCkyFu54gT2IlxQqNOgIAFusUAKCUws/Hu1UmxQpIoLgvTGoBIa79zCYzcZcFsroVSKDf9Lwv9Nzp7fNKBgCNOlojYZI8QGHInY8iYtYwvBx8yQf9OUpIsyUiE7Yw8xETJnNCTjaEHJihFtgwey0gbF43+n+1qwYpEZyK6WCT3BxndSuyuhWDU3GexIp+531h3cTJh8ClRE8Bs7xKGaHaVc43HkPug1bAvNVyW4jlthA2kiFO5wPf/8DJ+Qbf+5ngTsfHLuhMKGWkmwafQuRcUkZquS168z7SrkwVpWqzOXFGAZHzBpPyO5Hfsg7N03raT3DWAiLmheTvoKJ3OFeaz+VJrLK6FYt1emVRqwWyuhVNc/BWMW6Z4FQ8Jra7MlVm6+3bc+tcbQFaQEnI9nHRlanKk1j5LDMW1kNs/b7rxr4bDrGq9xY+J7tFNPRJg81o1gvTy11yjqCG5LwvFMU1J6FxtavgKmoA8AtYgj+GI+VMFwAAAABJRU5ErkJggg==">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MonkeyShrine · A candle for Harambe · MonkeyNet</title>
+<meta name="description" content="A quiet shrine kept lit for Harambe, the gorilla the internet couldn't stop mourning. Light a candle, leave a banana, and set the ache down somewhere.">
+<link rel="canonical" href="https://monkeynet.org/monkey-shrine.html">
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="MonkeyNet">
+<meta property="og:url" content="https://monkeynet.org/monkey-shrine.html">
+<meta property="og:title" content="MonkeyShrine · A candle for Harambe">
+<meta property="og:description" content="The internet mourned him loudly, ridiculously, for years. We don't think that was ironic. Light a candle. Leave a banana.">
+<meta property="og:image" content="https://monkeynet.org/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="I monkey, U monkey, together we climb">
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="MonkeyShrine · A candle for Harambe">
+<meta name="twitter:description" content="The internet mourned him loudly, ridiculously, for years. We don't think that was ironic. Light a candle. Leave a banana.">
+<meta name="twitter:image" content="https://monkeynet.org/og-image.png">
+<style>
+  :root{--bg:#12160F;--panel:#1B231D;--panel2:#252E27;--ink:#F5F2E9;--muted:#AFC1B4;
+    --banana:#F2D479;--jungle:#67C389;--line:#37463C;--danger:#E5775F;
+    --flame:#FFC259;--flame-core:#FFF6CF;--wax:#F3E9CE;--brass:#D8B45A}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  a{color:inherit;text-decoration:none}
+
+  /* warm candlelight wash + vignette over the whole dark page */
+  body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:radial-gradient(1200px 620px at 50% 8%,rgba(255,168,74,.16),transparent 62%),
+               radial-gradient(700px 420px at 50% 42%,rgba(255,120,40,.08),transparent 70%)}
+  body::after{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:radial-gradient(120% 90% at 50% 40%,transparent 55%,rgba(0,0,0,.55) 100%)}
+
+  .embers{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+  .ember{position:absolute;bottom:-12px;width:5px;height:5px;border-radius:50%;
+    background:radial-gradient(circle,rgba(255,196,110,.95),rgba(255,120,40,.15) 70%,transparent);
+    animation:rise linear infinite}
+  @keyframes rise{0%{transform:translateY(0) translateX(0);opacity:0}
+    12%{opacity:.9}80%{opacity:.6}100%{transform:translateY(-100vh) translateX(24px);opacity:0}}
+
+  .topbar{position:sticky;top:0;z-index:5;background:rgba(10,14,11,.86);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);padding:12px 20px;display:flex;align-items:center;gap:16px}
+  .brand{font-family:Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif;font-size:22px;
+    text-transform:uppercase;letter-spacing:.5px}
+  .brand .g{color:var(--flame)}
+  .topbar a{color:var(--muted);font-weight:700;font-size:14px}
+  .topbar a:hover{color:var(--banana)}
+  .topbar .sp{margin-left:auto}
+
+  .wrap{position:relative;z-index:1;max-width:720px;margin:0 auto;padding:30px 16px 96px}
+
+  /* masthead */
+  .kicker{letter-spacing:.22em;text-transform:uppercase;font-size:12px;color:var(--flame);
+    font-weight:800;margin-bottom:12px;text-align:center}
+  h1.mast{font-family:Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif;font-size:56px;
+    line-height:.94;margin:0 0 8px;text-transform:uppercase;letter-spacing:.5px;text-align:center}
+  h1.mast .g{color:var(--flame)}
+  .tag-sub{font-family:Georgia,ui-serif,serif;font-style:italic;color:var(--muted);font-size:18px;
+    margin:0 0 8px;text-align:center}
+
+  /* ---------- the altar ---------- */
+  .altar{position:relative;display:flex;align-items:flex-end;justify-content:center;gap:24px;
+    margin:30px 0 6px;min-height:230px}
+  .altar::before{content:"";position:absolute;top:-30px;left:50%;transform:translateX(-50%);
+    width:360px;height:360px;border-radius:50%;pointer-events:none;
+    background:radial-gradient(circle,rgba(255,170,72,.22),transparent 62%);
+    animation:breathe 5s ease-in-out infinite}
+
+  .portrait{position:relative;text-align:center;z-index:2}
+  .niche{width:176px;height:210px;margin:0 auto;border-radius:88px 88px 16px 16px;
+    background:radial-gradient(120% 90% at 50% 30%,#20291f,#12160F 78%);
+    border:3px solid var(--brass);box-shadow:0 0 0 1px rgba(255,220,150,.25) inset,
+      0 0 34px rgba(255,170,72,.28),0 14px 40px rgba(0,0,0,.5);
+    display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .niche .face{font-size:104px;line-height:1;filter:drop-shadow(0 6px 14px rgba(0,0,0,.55));
+    transform:translateY(4px)}
+  .plate{margin:14px auto 0;display:inline-block;padding:6px 18px;border-radius:6px;
+    background:linear-gradient(180deg,#F0D585,var(--brass) 55%,#A8823A);
+    color:#241a08;font-family:Georgia,ui-serif,serif;box-shadow:0 3px 10px rgba(0,0,0,.45),
+      0 0 0 1px rgba(255,240,190,.4) inset}
+  .plate .nm{font-weight:800;letter-spacing:.28em;font-size:15px;text-transform:uppercase}
+  .plate .yr{font-size:12px;letter-spacing:.14em;opacity:.85;margin-top:1px}
+
+  /* big memorial portrait above the altar */
+  .hero-portrait{position:relative;width:min(360px,86%);margin:24px auto 8px;border-radius:16px;
+    overflow:hidden;border:2px solid var(--brass);
+    box-shadow:0 0 0 1px rgba(255,220,150,.25) inset,0 0 46px rgba(255,170,72,.22),0 16px 46px rgba(0,0,0,.55)}
+  .hero-portrait::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(180deg,rgba(255,196,110,.10),transparent 46%,rgba(10,14,11,.34))}
+  .hero-portrait img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;object-position:50% 20%}
+
+  /* flanking taper candles (hidden on small screens; rack below carries the light) */
+  .tapers{display:flex;align-items:flex-end;gap:14px;z-index:1}
+
+  /* ---------- a candle ---------- */
+  .candle{position:relative;display:inline-flex;flex-direction:column;align-items:center}
+  .candle .glow{position:absolute;top:-18px;left:50%;transform:translateX(-50%);
+    width:64px;height:64px;border-radius:50%;z-index:0;pointer-events:none;
+    background:radial-gradient(circle,rgba(255,170,72,.32),transparent 66%);
+    animation:breathe 3.4s ease-in-out infinite}
+  .candle .flame{position:relative;z-index:2;width:16px;height:28px;
+    border-radius:50% 50% 45% 45% / 82% 82% 36% 36%;transform-origin:50% 92%;
+    background:radial-gradient(ellipse at 50% 78%,var(--flame-core) 0%,#FFDD84 30%,#FF9E3D 62%,#FF6F1A 100%);
+    box-shadow:0 -2px 20px 5px rgba(255,150,60,.5),0 0 42px 15px rgba(255,110,40,.2);
+    animation:flick 1.5s ease-in-out infinite}
+  .candle .flame::before{content:"";position:absolute;left:50%;bottom:2px;transform:translateX(-50%);
+    width:7px;height:15px;border-radius:50%;
+    background:radial-gradient(ellipse at 50% 80%,#fffef6,rgba(255,240,185,.25) 68%,transparent)}
+  .candle .flame::after{content:"";position:absolute;left:50%;bottom:-3px;transform:translateX(-50%);
+    width:9px;height:9px;border-radius:50%;
+    background:radial-gradient(circle,rgba(122,162,255,.55),transparent 70%)}
+  .candle .wick{width:2px;height:5px;background:#2c2318;z-index:2}
+  .candle .body{position:relative;z-index:1;width:26px;height:52px;border-radius:6px 6px 5px 5px;
+    background:linear-gradient(180deg,#FBF4DD 0%,#EADFBC 55%,#CDBD92 100%);
+    box-shadow:inset 0 7px 10px rgba(255,255,255,.45),inset 0 -9px 14px rgba(0,0,0,.28),
+      0 6px 14px rgba(0,0,0,.35)}
+  .candle .body::before{content:"";position:absolute;top:-3px;left:1px;right:1px;height:8px;
+    border-radius:50%;background:radial-gradient(ellipse at 50% 40%,#7c6c46,#e8dbb6 75%)}
+
+  /* taper variant */
+  .candle.taper .body{width:14px;height:104px;border-radius:4px}
+  .candle.taper .glow{width:52px;height:52px}
+
+  /* ---------- mantel: rack of votives + offerings ---------- */
+  .mantel{position:relative;z-index:1;margin:22px 0 2px;border-radius:16px;
+    background:linear-gradient(180deg,rgba(37,46,39,.5),rgba(20,26,19,.7));
+    border:1px solid var(--line);box-shadow:0 -1px 0 rgba(255,220,150,.12) inset;
+    padding:22px 18px 16px}
+  .rack{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:center;gap:16px 18px;
+    min-height:78px}
+  .shelfline{height:1px;background:linear-gradient(90deg,transparent,rgba(255,220,150,.3),transparent);
+    margin:16px 4px 14px}
+
+  .offerings{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:center;gap:14px 20px}
+  .offer{font-size:30px;line-height:1;filter:drop-shadow(0 4px 8px rgba(0,0,0,.45))}
+  .offer.ban{animation:sway 4.5s ease-in-out infinite}
+
+  /* incense with a thread of smoke */
+  .incense{position:relative;width:10px;height:74px}
+  .incense .stick{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:3px;height:60px;
+    background:linear-gradient(#6b4b2a,#3a2a18);border-radius:2px}
+  .incense .tip{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:6px;height:6px;
+    border-radius:50%;background:#ff7a1a;box-shadow:0 0 12px 4px rgba(255,120,40,.75);
+    animation:breathe 2.1s ease-in-out infinite}
+  .incense .smoke{position:absolute;top:10px;left:50%;width:8px;height:8px;border-radius:50%;
+    background:rgba(220,220,220,.22);filter:blur(3px);animation:smoke 4.4s linear infinite}
+  .incense .smoke.b{animation-delay:2.2s}
+
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;margin-top:16px}
+  .btn{cursor:pointer;border:1px solid var(--line);border-radius:999px;font-weight:800;font-size:13.5px;
+    padding:9px 18px;background:var(--panel2);color:var(--ink);transition:transform .15s,border-color .15s}
+  .btn:hover{transform:translateY(-2px);border-color:var(--flame)}
+  .btn.gold{background:var(--flame);color:#241a08;border-color:transparent}
+  .tally{width:100%;text-align:center;font-size:12.5px;color:var(--muted);margin-top:2px;min-height:16px}
+
+  /* prose */
+  .note{border-left:3px solid var(--flame);padding:8px 0 8px 16px;color:#EBE3CB;font-size:14.5px;
+    line-height:1.62;margin:26px 0 0}
+  .prose{font-family:Georgia,ui-serif,serif;font-size:16.5px;line-height:1.7;color:#E7E2D4;
+    margin:20px 0 0}
+  .prose + .prose{margin-top:16px}
+  .prose b{color:var(--ink)}
+  .whisper{font-family:Georgia,ui-serif,serif;font-style:italic;color:var(--muted);text-align:center;
+    font-size:16px;margin:26px 0 0}
+  .rule{border:none;border-top:1px solid var(--line);margin:28px 0 2px}
+  .cousins{border-left:3px solid #6C7A6E;padding:6px 0 6px 16px;color:var(--muted);font-size:14px;
+    line-height:1.6;margin:24px 0 0}
+  .cousins a{color:var(--jungle);font-weight:700}
+  .cousins a:hover{color:var(--flame)}
+
+  /* gallery of him, alive */
+  .gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:14px;margin:26px 0 0}
+  .ph{margin:0;position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--line);
+    box-shadow:0 0 0 1px rgba(255,220,150,.10) inset,0 10px 26px rgba(0,0,0,.42);
+    transition:transform .2s,box-shadow .2s}
+  .ph:hover{transform:translateY(-4px);
+    box-shadow:0 0 0 1px rgba(255,200,110,.4) inset,0 0 30px rgba(255,160,70,.24),0 14px 32px rgba(0,0,0,.5)}
+  .ph img{display:block;width:100%;aspect-ratio:3/4;object-fit:cover;object-position:50% 26%}
+  .ph figcaption{position:absolute;left:0;right:0;bottom:0;padding:20px 12px 8px;font-size:11.5px;
+    color:#EBE3CB;font-family:Georgia,ui-serif,serif;font-style:italic;
+    background:linear-gradient(transparent,rgba(9,12,9,.86))}
+  .credit{font-size:11.5px;color:var(--muted);line-height:1.6;margin:12px 4px 0;text-align:center}
+  .credit a{color:var(--jungle);font-weight:600}
+  .credit a:hover{color:var(--flame)}
+
+  /* the naming video */
+  .videowrap{margin:30px 0 0}
+  .vid-kicker{letter-spacing:.18em;text-transform:uppercase;font-size:12px;font-weight:800;
+    color:var(--flame);text-align:center;margin:0 0 6px}
+  .vid-sub{font-family:Georgia,ui-serif,serif;font-style:italic;color:var(--muted);text-align:center;
+    font-size:14.5px;margin:0 0 14px}
+  .vid{display:block;width:100%;position:relative;aspect-ratio:16/9;border-radius:14px;overflow:hidden;
+    border:1px solid var(--line);background:#000;object-fit:cover;
+    box-shadow:0 0 0 1px rgba(255,220,150,.12) inset,0 0 30px rgba(255,160,70,.14),0 12px 30px rgba(0,0,0,.46)}
+  .vid-poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 35%}
+  .vid::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+    background:linear-gradient(180deg,rgba(0,0,0,.10),rgba(0,0,0,.34))}
+  .vid-play{position:absolute;left:50%;top:50%;z-index:2;transform:translate(-50%,-50%);
+    width:76px;height:76px;border-radius:50%;background:rgba(18,22,15,.64);
+    border:2px solid rgba(255,255,255,.92);box-shadow:0 8px 26px rgba(0,0,0,.5);
+    transition:transform .18s,background .18s}
+  .vid-play::after{content:"";position:absolute;left:53%;top:50%;transform:translate(-50%,-50%);
+    border-style:solid;border-width:12px 0 12px 21px;border-color:transparent transparent transparent #fff}
+  .vid:hover .vid-play{transform:translate(-50%,-50%) scale(1.08);background:var(--danger)}
+  .vid-badge{position:absolute;z-index:2;right:10px;bottom:10px;
+    font-family:ui-sans-serif,system-ui,sans-serif;font-size:11px;font-weight:800;letter-spacing:.03em;
+    color:#fff;background:rgba(198,32,32,.94);padding:5px 9px;border-radius:6px}
+
+  footer{margin-top:38px;text-align:center;color:var(--muted);font-size:13.5px;line-height:1.6}
+  footer .em{font-family:Georgia,ui-serif,serif;font-style:italic;color:#D6CFBC}
+
+  @keyframes flick{
+    0%,100%{transform:rotate(-1.5deg) scaleY(1);opacity:.95}
+    25%{transform:rotate(1.5deg) scaleY(1.07) scaleX(.98);opacity:1}
+    50%{transform:rotate(-1deg) scaleY(.96) scaleX(1.04);opacity:.9}
+    75%{transform:rotate(1deg) scaleY(1.05);opacity:1}}
+  @keyframes breathe{0%,100%{opacity:.7;transform:translateX(-50%) scale(1)}
+    50%{opacity:1;transform:translateX(-50%) scale(1.12)}}
+  @keyframes smoke{0%{transform:translate(-50%,0) scale(.5);opacity:0}
+    18%{opacity:.5}100%{transform:translate(-160%,-64px) scale(2.4);opacity:0}}
+  @keyframes sway{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+
+  @media(max-width:640px){
+    h1.mast{font-size:44px}
+    .tapers{display:none}
+    .niche{width:150px;height:182px}
+    .niche .face{font-size:88px}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .flame,.glow,.ember,.smoke,.tip,.offer.ban,.altar::before{animation:none!important}
+  }
+</style>
+
+<div class="embers" id="embers" aria-hidden="true"></div>
+
+<div class="topbar">
+  <div class="brand">Monkey<span class="g">Shrine</span></div>
+  <a href="index.html">Hub</a>
+  <a href="monkey-gallery.html">Gallery</a>
+  <a href="monkey-news.html">News</a>
+  <a href="monkeynet-writings.html" class="sp">Writings</a>
+</div>
+
+<div class="wrap">
+  <div class="kicker">MonkeyNet · The Shrine</div>
+  <h1 class="mast">Monkey<span class="g">Shrine</span></h1>
+  <p class="tag-sub">A candle kept lit for a cousin.</p>
+
+  <figure class="hero-portrait">
+    <img src="harambe/harambe-1.jpg" alt="Harambe, a western lowland gorilla, in close portrait">
+  </figure>
+
+  <!-- the mantel: votive rack + the way in -->
+  <div class="mantel">
+    <div class="rack" id="rack" aria-label="candles lit at the shrine"></div>
+    <div class="controls">
+      <button class="btn gold" id="lightBtn">Light a candle</button>
+    </div>
+  </div>
+
+  <p class="note">He was a gorilla, which means, strictly, he was not one of us. Apes aren't monkeys.
+  But he was up in the same trees, and the same forest keeps getting harder to live in, so we keep a
+  branch for him here.</p>
+
+  <p class="prose">Harambe was born at the Gladys Porter Zoo on May 27, 1999, and died at the
+  Cincinnati Zoo on May 28, 2016, one day after he turned seventeen, when a small child fell into his
+  enclosure and there was no version of the next few minutes where everyone came out of it whole.
+  None of it was his fault. Almost none of it was anyone's, really. That is the part that stays with
+  you.</p>
+
+  <p class="prose">What happened next was strange, and if you squint, kind of beautiful. The internet
+  did not mourn him quietly. It mourned him loudly, ridiculously, with the rowdiest and least
+  dignified salute it could think of, and it kept the salute going for years, long past the point any
+  joke stays funny. Everyone agreed it was ironic. We don't think it was. We think a lot of people
+  felt an ache with no clean place to put it, for a big gentle animal who never asked to be a symbol,
+  and the ache came out sideways. <b>The joke was the grief.</b> They were never two separate things.</p>
+
+  <p class="whisper">So here is a quiet place to set it down straight.</p>
+
+  <!-- him, alive -->
+  <div class="gallery">
+    <figure class="ph">
+      <img src="harambe/harambe-2.jpg" alt="Harambe seated against the rock wall of his enclosure" loading="lazy">
+    </figure>
+    <figure class="ph">
+      <img src="harambe/harambe-4.jpg" alt="Harambe seated with his arms folded, looking toward the camera" loading="lazy">
+    </figure>
+    <figure class="ph">
+      <img src="harambe/statue.jpg" alt="The bronze Harambe memorial at the Cincinnati Zoo, banked with flowers" loading="lazy">
+      <figcaption>The memorial at the Cincinnati Zoo.</figcaption>
+    </figure>
+  </div>
+  <p class="credit">Living portraits by <a href="https://www.flickr.com/photos/wcdumonts/" target="_blank" rel="noopener">Mark Dumont</a>,
+  <a href="https://creativecommons.org/licenses/by-nc/2.0/" target="_blank" rel="noopener">CC BY-NC 2.0</a>.
+  Memorial by <a href="https://commons.wikimedia.org/wiki/File:Memorial_to_Harambe.jpg" target="_blank" rel="noopener">Kyle McCarthy</a>,
+  <a href="https://creativecommons.org/licenses/by-sa/2.0/" target="_blank" rel="noopener">CC BY-SA 2.0</a>.</p>
+
+  <!-- before any of it, a name -->
+  <div class="videowrap">
+    <div class="vid-kicker">Before he was a symbol</div>
+    <p class="vid-sub">The morning the zoo announced his name. He was small, and it was just good news.</p>
+    <video class="vid" controls preload="metadata" playsinline poster="harambe/harambe-baby.jpg">
+      <source src="harambe/harambe-naming.mp4" type="video/mp4">
+      Your browser can't play this clip.
+      <a href="https://www.youtube.com/watch?v=Dx3bMpLMY4U" target="_blank" rel="noopener">Watch it on YouTube</a>.
+    </video>
+  </div>
+
+  <p class="cousins">Apes aren't monkeys, but they're up in the same canopy. If you want to do more
+  than light a candle, the <a href="https://www.gorillafund.org/" target="_blank" rel="noopener">Dian Fossey
+  Gorilla Fund</a> looks after the ones still climbing.</p>
+
+  <hr class="rule">
+
+  <footer>
+    <p class="em">Light one, and go.</p>
+    <p>MonkeyNet · for a cousin who never asked to be a symbol · 🦍🍌</p>
+  </footer>
+</div>
+
+<script>
+  // rising embers
+  (function(){
+    const box=document.getElementById('embers');
+    for(let i=0;i<20;i++){
+      const e=document.createElement('span');
+      e.className='ember';
+      e.style.left=(Math.random()*100)+'vw';
+      const s=(3+Math.random()*4);
+      e.style.width=e.style.height=s+'px';
+      e.style.animationDuration=(9+Math.random()*10)+'s';
+      e.style.animationDelay=(-Math.random()*18)+'s';
+      e.style.opacity=(0.35+Math.random()*0.45);
+      box.appendChild(e);
+    }
+  })();
+
+  // build a votive candle element with slightly desynced flicker
+  function makeCandle(){
+    const c=document.createElement('div');
+    c.className='candle';
+    c.innerHTML='<span class="glow"></span><span class="flame"></span><span class="wick"></span><span class="body"></span>';
+    const d=(-Math.random()*2).toFixed(2);
+    const dur=(1.25+Math.random()*0.6).toFixed(2);
+    c.querySelectorAll('.flame,.glow').forEach(el=>{
+      el.style.animationDelay=d+'s'; el.style.animationDuration=dur+'s';
+    });
+    return c;
+  }
+
+  const rack=document.getElementById('rack');
+  const CAP=80; // don't overflow the rack
+
+  // personal, ephemeral count. yours, no one else's.
+  let candles=Math.max(0,parseInt(localStorage.getItem('shrine_candles')||'0',10)||0);
+
+  function seedCandles(n){
+    // always show a small resting glow even on a first visit
+    const base=Math.max(6,Math.min(CAP,n));
+    for(let i=0;i<base;i++) rack.appendChild(makeCandle());
+  }
+
+  seedCandles(candles);
+
+  document.getElementById('lightBtn').addEventListener('click',()=>{
+    if(rack.children.length<CAP) rack.appendChild(makeCandle());
+    candles++; localStorage.setItem('shrine_candles',candles);
+  });
+</script>
