@@ -1,9 +1,9 @@
-<!-- MonkeyMaker — a monkey meme maker. Single-file app. -->
+<!-- MonkeyMaker — draw on a monkey, meme a monkey, or scrawl one from scratch. Single-file app (MonkeyDraw now folded in). -->
 <meta charset="utf-8">
 <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACAklEQVR4nN1Xu23DMBB9DDKBgUyQwgbUphO8AAdQa1fqUmgSFU6lNFKrAbSAoyJAWgNWkQkMOCMwRXwEdSZpyZSaPMCAefy84/F+Av4bujJVY9Y/zEE+RgkRSponcY9MyghNc+ityerWyROkAJFLGXnXNc3BqcRjiAJE/vT8osen7y8A6MmkBLK6te6/2wfo9iYRjW0y/lTBCkyFu54gT2IlxQqNOgIAFusUAKCUws/Hu1UmxQpIoLgvTGoBIa79zCYzcZcFsroVSKDf9Lwv9Nzp7fNKBgCNOlojYZI8QGHInY8iYtYwvBx8yQf9OUpIsyUiE7Yw8xETJnNCTjaEHJihFtgwey0gbF43+n+1qwYpEZyK6WCT3BxndSuyuhWDU3GexIp+531h3cTJh8ClRE8Bs7xKGaHaVc43HkPug1bAvNVyW4jlthA2kiFO5wPf/8DJ+Qbf+5ngTsfHLuhMKGWkmwafQuRcUkZquS168z7SrkwVpWqzOXFGAZHzBpPyO5Hfsg7N03raT3DWAiLmheTvoKJ3OFeaz+VJrLK6FYt1emVRqwWyuhVNc/BWMW6Z4FQ8Jra7MlVm6+3bc+tcbQFaQEnI9nHRlanKk1j5LDMW1kNs/b7rxr4bDrGq9xY+J7tFNPRJg81o1gvTy11yjqCG5LwvFMU1J6FxtavgKmoA8AtYgj+GI+VMFwAAAABJRU5ErkJggg==">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MonkeyMaker · The monkey meme studio · MonkeyNet</title>
-<meta name="description" content="The monkey meme studio. Pick a monkey, add impact text and stickers, deep-fry it, then post it straight to the Gallery.">
+<title>MonkeyMaker · Draw + meme your own monkey · MonkeyNet</title>
+<meta name="description" content="The monkey studio. Pick a monkey, add impact text and stickers, draw right on top by hand or scrawl one from a blank sheet, deep-fry it, then post it to the Gallery.">
 <link rel="canonical" href="https://monkeynet.org/monkey-maker.html">
 <!-- Open Graph -->
 <meta property="og:type" content="website">
@@ -44,15 +44,29 @@
   .logo span{color:var(--jungle);-webkit-text-fill-color:var(--jungle)}
   .tag{color:var(--muted);font-size:13px;text-shadow:0 1px 4px rgba(0,0,0,.6)}
   .grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px}
-  @media(max-width:880px){.grid{grid-template-columns:1fr}}
+  @media(max-width:880px){
+    .grid{grid-template-columns:1fr}
+    .wrap{padding:14px 12px 40px}
+    .logo{font-size:34px}
+    .sw{width:34px;height:34px}
+    .zoombar button{height:44px}
+    .zoombar #zoomFit{font-size:14px}
+    .tab{padding:14px 4px;font-size:14px}
+    .stk{font-size:30px}
+    body.qb-open{padding-bottom:74px}
+    body.qb-open .toast{bottom:84px}
+  }
 
   .stage{background:rgba(9,15,11,.5);backdrop-filter:blur(7px);
     border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;
     align-items:safe center;justify-content:safe center;min-height:360px;
-    max-height:78vh;overflow:auto}
+    max-height:78vh;overflow:auto;
+    user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
   canvas{max-width:none;height:auto;display:block;border-radius:8px;box-shadow:0 16px 50px rgba(0,0,0,.55);
     touch-action:none;cursor:grab;background:#000}
   canvas:active{cursor:grabbing}
+  canvas.mkdraw{cursor:crosshair}
+  canvas.mkdraw:active{cursor:crosshair}
 
   .panel{background:var(--panel);backdrop-filter:blur(12px) saturate(1.1);
     border:1px solid var(--line);border-radius:16px;overflow:hidden;
@@ -79,12 +93,16 @@
 
   label{display:block;font-size:12px;color:var(--muted);margin:12px 0 5px}
   input[type=text],textarea,select{width:100%;background:var(--panel2);color:var(--cream);
-    border:1px solid var(--line);border-radius:9px;padding:9px 10px;font-size:14px;font-family:inherit}
+    border:1px solid var(--line);border-radius:9px;padding:9px 10px;font-size:16px;font-family:inherit}
   textarea{resize:vertical;min-height:70px;line-height:1.4}
   input[type=range]{width:100%;accent-color:var(--banana)}
-  .swatches{display:flex;gap:6px;flex-wrap:wrap}
-  .sw{width:26px;height:26px;border-radius:50%;border:2px solid #00000040;cursor:pointer}
+  .swatches{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .sw{width:26px;height:26px;border-radius:50%;border:2px solid #00000040;cursor:pointer;padding:0}
   .sw.on{outline:2px solid var(--banana);outline-offset:2px}
+  .sw.pick{position:relative;overflow:hidden;
+    background:conic-gradient(from 0deg,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)}
+  .sw.pick input{position:absolute;inset:-6px;opacity:0;cursor:pointer;width:200%;height:200%}
+  .brushdot{border-radius:50%;background:var(--cream);flex:0 0 auto;box-shadow:0 0 0 1px #00000040}
   .toggle{display:flex;gap:6px;flex-wrap:wrap}
   .toggle button{flex:1;min-width:64px;padding:8px;border:1px solid var(--line);background:var(--panel2);
     color:var(--cream);border-radius:8px;cursor:pointer;font-size:13px}
@@ -115,6 +133,18 @@
   .selbar button.del{color:var(--danger);border-color:#5a2a22}
   .note{background:rgba(63,163,77,.12);border:1px solid rgba(63,163,77,.4);border-radius:10px;
     padding:10px 12px;font-size:12px;color:#BFE6C4;line-height:1.55;margin-top:14px}
+  .layerpanel{padding:14px;border-top:1px solid var(--line)}
+  .layerlist{display:flex;flex-direction:column;gap:6px}
+  .layerrow{display:flex;align-items:center;gap:7px;padding:6px 8px;border:1px solid var(--line);
+    border-radius:9px;background:var(--panel2);cursor:pointer}
+  .layerrow.on{border-color:var(--banana);box-shadow:0 0 0 1px var(--banana)}
+  .layerrow .licon{flex:0 0 auto;font-size:16px;width:20px;text-align:center}
+  .layerrow .lname{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
+  .layerrow button{flex:0 0 auto;width:30px;height:30px;border:1px solid var(--line);background:var(--panel);
+    color:var(--cream);border-radius:7px;cursor:pointer;font-size:12px;line-height:1;
+    display:flex;align-items:center;justify-content:center}
+  .layerrow button.del{color:var(--danger);border-color:#5a2a22}
+  .layerrow button:disabled{opacity:.32;cursor:default}
   .mk{position:relative}
   .mk .mktag{position:absolute;top:3px;right:3px;font-size:11px;background:rgba(0,0,0,.6);
     border-radius:6px;padding:1px 4px;line-height:1.3}
@@ -122,6 +152,19 @@
     color:#0B0E0C;padding:11px 18px;border-radius:999px;font-weight:700;font-size:14px;
     box-shadow:0 8px 24px rgba(0,0,0,.5);opacity:0;transition:.25s;pointer-events:none;z-index:9}
   .toast.show{opacity:1}
+
+  /* mobile floating quick actions for the selected layer */
+  #quickbar{position:fixed;left:8px;right:8px;bottom:8px;z-index:8;display:none;gap:6px;
+    padding:7px;border-radius:14px;background:rgba(18,24,20,.94);
+    backdrop-filter:blur(10px) saturate(1.1);border:1px solid var(--line);
+    box-shadow:0 10px 34px rgba(0,0,0,.55)}
+  #quickbar.show{display:flex}
+  #quickbar button{flex:1;min-width:0;height:46px;border:1px solid var(--line);
+    background:var(--panel2);color:var(--cream);border-radius:10px;font-size:18px;
+    font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  #quickbar button:active{background:rgba(242,212,121,.18)}
+  #quickbar button.del{color:var(--danger);border-color:#5a2a22}
+  @media(min-width:881px){#quickbar{display:none!important}}
 </style>
 
 <div class="wrap">
@@ -151,6 +194,7 @@
     <div class="panel">
       <div class="tabs">
         <button class="tab on" data-t="monkeys">Image</button>
+        <button class="tab" data-t="draw">Draw</button>
         <button class="tab" data-t="text">Text</button>
         <button class="tab" data-t="stickers">Stickers</button>
         <button class="tab" data-t="share">Share</button>
@@ -163,6 +207,7 @@
         <button class="btn ghost sm" id="expandMonkeys" style="margin-top:8px">Show all monkeys</button>
         <button class="btn ghost sm" id="uploadBtn" style="margin-top:10px">Upload a monkey photo</button>
         <input type="file" id="fileInput" accept="image/*" hidden>
+        <button class="btn ghost sm" id="blankBtn" style="margin-top:10px">No monkey: I'll draw one</button>
 
         <h3 style="margin-top:18px">Filter</h3>
         <div class="toggle" id="filterRow">
@@ -175,6 +220,33 @@
           <label>Fry level <span id="fryVal">70%</span></label>
           <input type="range" id="fryRange" min="20" max="100" value="70">
         </div>
+      </div>
+
+      <!-- DRAW -->
+      <div class="body" data-b="draw">
+        <h3>Brush</h3>
+        <div class="toggle" id="drawToolRow">
+          <button id="brushBtn" class="on">🖌️ Brush</button>
+          <button id="fillBtn">🥛 Fill</button>
+          <button id="eraseBtn">🧽 Eraser</button>
+        </div>
+        <label>Color</label>
+        <div class="swatches" id="drawSwatches"></div>
+        <label>Brush size <span id="brushSizeVal">14px</span></label>
+        <div class="swatches" style="margin-bottom:2px">
+          <input type="range" id="brushSize" min="1" max="90" value="14" style="flex:1">
+          <span class="brushdot" id="brushDot"></span>
+        </div>
+        <div class="selbar">
+          <button id="drawUndo">↩ Undo stroke</button>
+          <button id="drawClear" class="del">Clear drawing</button>
+        </div>
+
+        <h3 style="margin-top:18px">Background</h3>
+        <div class="swatches" id="paperSwatches"></div>
+        <div class="hint">Drag on the canvas to paint, or tap with 🥛 Fill to flood an area. The background
+          color shows through wherever there's no monkey. Every layer (background, monkey, drawing, text,
+          stickers) is listed under Layers, where you can reorder or delete them.</div>
       </div>
 
       <!-- TEXT -->
@@ -248,8 +320,24 @@
         <button class="btn ghost" id="downloadBtn" style="margin-top:10px">Download</button>
         <div class="hint">Or just save the meme and post it wherever you like.</div>
       </div>
+
+      <!-- LAYERS (persistent; appears once there are text/sticker layers) -->
+      <div class="layerpanel" id="layerPanel" style="display:none">
+        <h3>Layers</h3>
+        <div class="layerlist" id="layerList"></div>
+        <div class="hint">Front layer sits on top. Tap a layer to edit it, use &#9650; &#9660; to reorder.
+          Your drawing stays under all of these.</div>
+      </div>
     </div>
   </div>
+</div>
+<div id="quickbar" role="toolbar" aria-label="Selected layer quick actions">
+  <button id="qbMinus" aria-label="Shrink layer">A&minus;</button>
+  <button id="qbPlus" aria-label="Grow layer">A+</button>
+  <button id="qbRotL" aria-label="Rotate left">&#x27F2;</button>
+  <button id="qbRotR" aria-label="Rotate right">&#x27F3;</button>
+  <button id="qbFront" aria-label="Bring to front">&#x2B06;</button>
+  <button id="qbDel" class="del" aria-label="Delete layer">&#x1F5D1;</button>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -257,9 +345,79 @@
 <script>
 const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
-let bgImg = null, layers = [], selected = null, uid = 1, isDragging = false, zoom = 1;
+let layers = [], selected = null, uid = 1, isDragging = false, zoom = 1;
 const state = {filter:'none', fryAmt:70};
 const D2R = Math.PI/180;
+
+/* ---------- freehand draw layer (folds MonkeyDraw into the studio) ---------- */
+const drawCv = document.createElement('canvas');
+const dctx = drawCv.getContext('2d');
+let drawMode = false, brushColor = '#7A4E2D', brushSize = 14, erasing = false, filling = false;
+let painting = false, lastPt = null, bgToken = 0;
+const drawUndoStack = []; const DRAW_UNDO_MAX = 20;
+
+/* unified layer stack (index 0 = bottom): bg (pinned) < monkey < drawing < text/stickers */
+const bgLayer = {id:uid++, type:'bg', color:'#F5F2E9'};
+const drawLayer = {id:uid++, type:'draw'};
+let monkeyLayer = null;
+layers = [bgLayer];
+function ensureDrawLayer(){ if(layers.includes(drawLayer)) return false;   // returns true if it was just added
+  let idx=layers.indexOf(monkeyLayer); idx = idx>=0 ? idx+1 : 1;          // sit just above the monkey (or bg)
+  layers.splice(idx,0,drawLayer); return true; }
+function clearDrawing(){ dctx.clearRect(0,0,drawCv.width,drawCv.height); drawUndoStack.length=0;
+  layers=layers.filter(l=>l!==drawLayer); if(selected===drawLayer.id){ selected=null; syncControls(); }
+  render(); renderLayers(); }
+function resizeDrawLayer(w,h){
+  if(drawCv.width===w && drawCv.height===h) return;
+  if(drawCv.width && drawCv.height){           // keep existing strokes, scaled to the new size
+    const tmp=document.createElement('canvas'); tmp.width=drawCv.width; tmp.height=drawCv.height;
+    tmp.getContext('2d').drawImage(drawCv,0,0);
+    drawCv.width=w; drawCv.height=h; dctx.drawImage(tmp,0,0,w,h);
+  } else { drawCv.width=w; drawCv.height=h; }
+  drawUndoStack.length=0;
+}
+function drawSnapshot(){ try{ drawUndoStack.push(dctx.getImageData(0,0,drawCv.width,drawCv.height));
+  if(drawUndoStack.length>DRAW_UNDO_MAX) drawUndoStack.shift(); }catch(e){} }
+function paintStroke(a,b){
+  dctx.globalCompositeOperation = erasing ? 'destination-out' : 'source-over';
+  dctx.strokeStyle=brushColor; dctx.lineWidth=brushSize; dctx.lineCap='round'; dctx.lineJoin='round';
+  dctx.beginPath(); dctx.moveTo(a.x,a.y); dctx.lineTo(b.x,b.y); dctx.stroke();
+}
+function hexToRgb(hex){ hex=(hex||'').replace('#','');
+  if(hex.length===3) hex=hex.split('').map(c=>c+c).join('');
+  const n=parseInt(hex,16); return {r:(n>>16)&255, g:(n>>8)&255, b:n&255}; }
+function floodFill(px,py){
+  const w=drawCv.width, h=drawCv.height; px=Math.round(px); py=Math.round(py);
+  if(px<0||py<0||px>=w||py>=h) return;
+  const image=dctx.getImageData(0,0,w,h), data=image.data;
+  const s=(py*w+px)*4, tr=data[s],tg=data[s+1],tb=data[s+2],ta=data[s+3];
+  let fr,fg,fb,fa; if(erasing){ fr=fg=fb=0; fa=0; } else { const c=hexToRgb(brushColor); fr=c.r;fg=c.g;fb=c.b;fa=255; }
+  if(tr===fr&&tg===fg&&tb===fb&&ta===fa) return;         // seed already the fill color
+  const tol2=48*48*4;
+  const matches=i=>{ const dr=data[i]-tr,dg=data[i+1]-tg,db=data[i+2]-tb,da=data[i+3]-ta;
+    return dr*dr+dg*dg+db*db+da*da<=tol2; };
+  const visited=new Uint8Array(w*h), stack=[px,py];
+  while(stack.length){
+    const y=stack.pop(), x=stack.pop();
+    let xl=x; while(xl>=0 && !visited[y*w+xl] && matches((y*w+xl)*4)) xl--; xl++;
+    let up=false, dn=false, xr=xl;
+    while(xr<w && !visited[y*w+xr] && matches((y*w+xr)*4)){
+      const pI=y*w+xr; visited[pI]=1; const q=pI*4; data[q]=fr;data[q+1]=fg;data[q+2]=fb;data[q+3]=fa;
+      if(y>0){ const u=(y-1)*w+xr, m=!visited[u]&&matches(u*4);
+        if(m&&!up){ stack.push(xr,y-1); up=true; } else if(!m) up=false; }
+      if(y<h-1){ const d=(y+1)*w+xr, m=!visited[d]&&matches(d*4);
+        if(m&&!dn){ stack.push(xr,y+1); dn=true; } else if(!m) dn=false; }
+      xr++;
+    }
+  }
+  dctx.putImageData(image,0,0);
+}
+function paintDown(e){ const p=canvasPos(e); const added=ensureDrawLayer();
+  if(filling){ drawSnapshot(); floodFill(p.x,p.y); render(); if(added)renderLayers(); e.preventDefault(); return; }
+  drawSnapshot(); painting=true; lastPt=p;
+  paintStroke(p,{x:p.x+0.01,y:p.y}); render(); if(added)renderLayers(); e.preventDefault(); }
+function paintMove(e){ if(!painting)return; const p=canvasPos(e); paintStroke(lastPt,p); lastPt=p; render(); e.preventDefault(); }
+function paintUp(){ if(painting){ painting=false; lastPt=null; render(); } }
 
 const FILLS   = ['#FFFFFF','#000000','#F5C518','#E5563C','#3FA34D','#4A90E2','#E24AB7'];
 const STROKES = ['#000000','#FFFFFF','#3FA34D','#E5563C','#5A3A1A'];
@@ -287,21 +445,32 @@ function rollCaption(){ const t=document.getElementById('caption');
 
 const RATIOS = [[1080,1080],[1080,1080],[1080,1080],[1080,1080],[1080,1080],[1080,1080],[1080,1080],[1080,1080],[1080,1920],[1080,1080],[1080,1080],[1080,1080],[1080,1350],[1080,1080],[1080,1350],[1080,1350]];
 
-function setBackground(img){ bgImg=img; render(); }
-function loadBg(src){ const img=new Image(); img.onload=()=>setBackground(img); img.src=src; }
+function setMonkeyImg(img, uploaded){
+  if(monkeyLayer){ monkeyLayer.img=img; monkeyLayer.uploaded=!!uploaded; }
+  else { monkeyLayer={id:uid++, type:'monkey', img, uploaded:!!uploaded}; layers.splice(1,0,monkeyLayer); } // just above bg
+  render(); renderLayers(); }
+function loadBg(src){ const my=++bgToken; const img=new Image();
+  img.onload=()=>{ if(my===bgToken) setMonkeyImg(img,false); }; img.src=src; }
+function removeMonkey(){ bgToken++;   // cancel any in-flight monkey load
+  if(monkeyLayer){ layers=layers.filter(l=>l!==monkeyLayer); monkeyLayer=null; }
+  document.querySelectorAll('.mk').forEach(m=>m.classList.remove('on'));
+  render(); renderLayers(); }
 
 /* ---------- rendering ---------- */
 function drawBase(){
   ctx.clearRect(0,0,cv.width,cv.height);
-  ctx.fillStyle='#000'; ctx.fillRect(0,0,cv.width,cv.height);
-  if(bgImg){ const s=Math.max(cv.width/bgImg.width, cv.height/bgImg.height);
-    const w=bgImg.width*s, h=bgImg.height*s;
-    ctx.drawImage(bgImg,(cv.width-w)/2,(cv.height-h)/2,w,h); }
-  for(const L of layers){ L.type==='text'?drawText(L):drawSticker(L); }
+  for(const L of layers){
+    if(L.type==='bg'){ ctx.fillStyle=L.color||'#000'; ctx.fillRect(0,0,cv.width,cv.height); }
+    else if(L.type==='monkey'){ const im=L.img; if(im){ const s=Math.max(cv.width/im.width, cv.height/im.height);
+      const w=im.width*s, h=im.height*s; ctx.drawImage(im,(cv.width-w)/2,(cv.height-h)/2,w,h); } }
+    else if(L.type==='draw'){ ctx.drawImage(drawCv,0,0); }
+    else if(L.type==='text'){ drawText(L); }
+    else { drawSticker(L); }
+  }
 }
 function render(){
   drawBase();
-  if(!isDragging) applyFilter();
+  if(!isDragging && !painting) applyFilter();       // skip the pixel filter mid-stroke for smoothness
   const sel=getSel(); if(sel) drawSelection(sel);
 }
 function drawText(L){
@@ -359,14 +528,14 @@ function addTextLayer(text,yFrac){ const L={id:uid++,type:'text',text,x:cv.width
   layers.push(L); select(L.id); switchTab('text'); render(); }
 function addStickerLayer(emoji){ const L={id:uid++,type:'sticker',emoji,x:cv.width/2,y:cv.height/2,size:200,rot:0};
   layers.push(L); select(L.id); switchTab('stickers'); render(); }
-function select(id){ selected=id; syncControls(); render(); }
+function select(id){ selected=id; syncControls(); render(); renderLayers(); }
 function getSel(){ return layers.find(l=>l.id===selected); }
 
 /* ---------- drag (rotation-aware hit test) ---------- */
 function canvasPos(e){ const r=cv.getBoundingClientRect(); const p=e.touches?e.touches[0]:e;
   return {x:(p.clientX-r.left)*(cv.width/r.width), y:(p.clientY-r.top)*(cv.height/r.height)}; }
 let drag=null;
-function pointerDown(e){ const {x,y}=canvasPos(e);
+function pointerDown(e){ if(drawMode){ paintDown(e); return; } const {x,y}=canvasPos(e);
   for(let i=layers.length-1;i>=0;i--){ const L=layers[i]; if(L._hw==null)continue;
     const dx=x-L.x, dy=y-L.y, a=-(L.rot||0);
     const rx=dx*Math.cos(a)-dy*Math.sin(a), ry=dx*Math.sin(a)+dy*Math.cos(a);
@@ -374,9 +543,9 @@ function pointerDown(e){ const {x,y}=canvasPos(e);
       drag={dx:x-L.x,dy:y-L.y}; isDragging=true; e.preventDefault(); return; } }
   select(null);
 }
-function pointerMove(e){ if(!drag)return; const L=getSel(); if(!L)return;
+function pointerMove(e){ if(drawMode){ paintMove(e); return; } if(!drag)return; const L=getSel(); if(!L)return;
   const {x,y}=canvasPos(e); L.x=x-drag.dx; L.y=y-drag.dy; render(); e.preventDefault(); }
-function pointerUp(){ if(drag){ drag=null; isDragging=false; render(); } }
+function pointerUp(){ if(drawMode){ paintUp(); return; } if(drag){ drag=null; isDragging=false; render(); } }
 cv.addEventListener('mousedown',pointerDown); cv.addEventListener('touchstart',pointerDown,{passive:false});
 window.addEventListener('mousemove',pointerMove); cv.addEventListener('touchmove',pointerMove,{passive:false});
 window.addEventListener('mouseup',pointerUp); window.addEventListener('touchend',pointerUp);
@@ -400,6 +569,7 @@ function syncControls(){
     document.getElementById('stkSizeVal').textContent=L.size+'px';
     const deg=Math.round((L.rot||0)/D2R);
     document.getElementById('stkRot').value=deg; document.getElementById('stkRotVal').textContent=deg+'\u00B0'; }
+  updateQuickbar();
 }
 function paintSwatches(id,colors,current,onPick){ const host=document.getElementById(id); host.innerHTML='';
   colors.forEach(c=>{ const d=document.createElement('div'); d.className='sw'+(c===current?' on':'');
@@ -407,11 +577,16 @@ function paintSwatches(id,colors,current,onPick){ const host=document.getElement
 
 /* ---------- tabs ---------- */
 function switchTab(name){ document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.t===name));
-  document.querySelectorAll('.body').forEach(b=>b.classList.toggle('on',b.dataset.b===name)); }
+  document.querySelectorAll('.body').forEach(b=>b.classList.toggle('on',b.dataset.b===name));
+  setDrawMode(name==='draw'); }
+function setDrawMode(on){ drawMode=on; cv.classList.toggle('mkdraw',on);
+  if(on) select(null);          // drop any layer selection so paints don't fight the drag handles
+  else painting=false;
+  render(); }
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>switchTab(t.dataset.t));
 
 /* ratios */
-function setRatio(w,h){ cv.width=w; cv.height=h;
+function setRatio(w,h){ cv.width=w; cv.height=h; resizeDrawLayer(w,h);
   document.querySelectorAll('#ratios button').forEach(x=>x.classList.toggle('on',+x.dataset.w===w&&+x.dataset.h===h));
   render(); fitZoom(); }
 document.getElementById('ratios').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return;
@@ -445,7 +620,8 @@ document.getElementById('expandMonkeys').onclick=function(){
 document.getElementById('uploadBtn').onclick=()=>document.getElementById('fileInput').click();
 document.getElementById('fileInput').onchange=e=>{ const f=e.target.files[0]; if(!f)return;
   const r=new FileReader(); r.onload=()=>{ const img=new Image();
-    img.onload=()=>{ document.querySelectorAll('.mk').forEach(m=>m.classList.remove('on')); setBackground(img); };
+    img.onload=()=>{ document.querySelectorAll('.mk').forEach(m=>m.classList.remove('on'));
+      bgToken++; setMonkeyImg(img,true); };
     img.src=r.result; }; r.readAsDataURL(f); };
 
 /* filters */
@@ -486,8 +662,117 @@ document.getElementById('stkRot').oninput=e=>{const L=getSel();if(L){L.rot=e.tar
 document.getElementById('stkFront').onclick=bringFront;
 document.getElementById('delStkBtn').onclick=delSel;
 
-function bringFront(){const L=getSel();if(!L)return;layers=layers.filter(l=>l!==L);layers.push(L);render();}
-function delSel(){layers=layers.filter(l=>l.id!==selected);selected=null;syncControls();render();}
+function bringFront(){const L=getSel();if(!L)return;layers=layers.filter(l=>l!==L);layers.push(L);render();renderLayers();}
+function delSel(){layers=layers.filter(l=>l.id!==selected);selected=null;syncControls();render();renderLayers();}
+
+/* ---------- layers panel (select / reorder / delete every layer) ---------- */
+function layerLabel(L){
+  if(L.type==='bg')     return {name:'Background', swatch:L.color};
+  if(L.type==='monkey') return {icon:'🐵', name: L.uploaded?'Photo':'Monkey'};
+  if(L.type==='draw')   return {icon:'🖍️', name:'Drawing'};
+  if(L.type==='text'){ const t=(L.text||'').replace(/\s+/g,' ').trim(); return {icon:'🅣', name: t?t.slice(0,26):'text'}; }
+  return {icon:L.emoji, name:'sticker'};
+}
+function moveLayer(L,dir){ if(L.type==='bg')return; const i=layers.indexOf(L); if(i<0)return;
+  const minIdx=(layers[0]&&layers[0].type==='bg')?1:0; const j=i+dir;
+  if(j<minIdx||j>=layers.length)return; layers.splice(i,1); layers.splice(j,0,L); render(); renderLayers(); }
+function deleteLayer(L){
+  if(L.type==='bg') return;                       // there is always a background
+  if(L.type==='monkey'){ removeMonkey(); return; }
+  if(L.type==='draw'){ clearDrawing(); return; }
+  layers=layers.filter(x=>x!==L); if(selected===L.id){ selected=null; syncControls(); }
+  render(); renderLayers();
+}
+function selectFromList(L){
+  const tab = L.type==='text'?'text' : L.type==='sticker'?'stickers' : L.type==='monkey'?'monkeys' : 'draw';
+  switchTab(tab); select(L.id);                   // switchTab first (draw mode deselects), then re-select so the row stays lit
+}
+function renderLayers(){
+  const panel=document.getElementById('layerPanel'), list=document.getElementById('layerList');
+  if(!panel||!list) return;
+  if(!layers.length){ panel.style.display='none'; list.innerHTML=''; return; }
+  panel.style.display='block'; list.innerHTML='';
+  const minIdx=(layers[0]&&layers[0].type==='bg')?1:0;
+  for(let i=layers.length-1;i>=0;i--){ const L=layers[i], info=layerLabel(L);   // front (last) at top
+    const row=document.createElement('div'); row.className='layerrow'+(L.id===selected?' on':'');
+    row.onclick=e=>{ if(e.target.closest('button'))return; selectFromList(L); };
+    const ic=document.createElement('span'); ic.className='licon';
+    if(info.swatch){ ic.style.cssText='width:16px;height:16px;border-radius:4px;box-shadow:0 0 0 1px #00000040';
+      ic.style.background=info.swatch; }
+    else ic.textContent=info.icon;
+    const nm=document.createElement('span'); nm.className='lname'; nm.textContent=info.name;
+    const up=document.createElement('button'); up.type='button'; up.innerHTML='&#9650;'; up.title='Move up';
+    up.disabled=(L.type==='bg')||(i===layers.length-1); up.onclick=()=>moveLayer(L,1);
+    const dn=document.createElement('button'); dn.type='button'; dn.innerHTML='&#9660;'; dn.title='Move down';
+    dn.disabled=(L.type==='bg')||(i<=minIdx); dn.onclick=()=>moveLayer(L,-1);
+    row.append(ic,nm,up,dn);
+    if(L.type!=='bg'){ const del=document.createElement('button'); del.type='button'; del.className='del';
+      del.innerHTML='&#128465;'; del.title='Delete layer'; del.onclick=()=>deleteLayer(L); row.append(del); }
+    list.appendChild(row);
+  }
+}
+
+/* ---------- draw tab (freehand brush) ---------- */
+const DRAW_COLORS=['#12160F','#7A4E2D','#B07C4E','#F2D479','#E5775F','#67C389','#5F9BE5','#C58FE5','#F5F2E9'];
+const PAPERS=['#F5F2E9','#F2D479','#C7E7CF','#F6C7C7','#12160F','#252E27'];
+const drawBrushBtn=document.getElementById('brushBtn'), drawEraseBtn=document.getElementById('eraseBtn'),
+      drawFillBtn=document.getElementById('fillBtn');
+const brushDot=document.getElementById('brushDot');
+function syncBrush(){ drawBrushBtn.classList.toggle('on',!erasing&&!filling);
+  drawFillBtn.classList.toggle('on',filling&&!erasing);
+  drawEraseBtn.classList.toggle('on',erasing);
+  document.getElementById('brushSizeVal').textContent=brushSize+'px';
+  const d=Math.max(4,Math.min(30,brushSize)); brushDot.style.width=d+'px'; brushDot.style.height=d+'px';
+  brushDot.style.background=erasing?'var(--muted)':brushColor; }
+drawBrushBtn.onclick=()=>{ erasing=false; filling=false; syncBrush(); };
+drawFillBtn.onclick=()=>{ filling=true; erasing=false; syncBrush(); };
+drawEraseBtn.onclick=()=>{ erasing=true; filling=false; syncBrush(); };
+
+const dsw=document.getElementById('drawSwatches');
+function setBrushColor(c){ brushColor=c;
+  [...dsw.querySelectorAll('.sw:not(.pick)')].forEach(x=>x.classList.toggle('on',x.dataset.c===c));
+  const pin=document.getElementById('brushPicker'); if(pin && /^#[0-9a-f]{6}$/i.test(c)) pin.value=c; }
+DRAW_COLORS.forEach(c=>{ const b=document.createElement('button'); b.type='button';
+  b.className='sw'+(c===brushColor?' on':''); b.style.background=c; b.dataset.c=c;
+  b.onclick=()=>{ setBrushColor(c); erasing=false; syncBrush(); }; dsw.appendChild(b); });
+const pickBtn=document.createElement('button'); pickBtn.type='button'; pickBtn.className='sw pick'; pickBtn.title='Custom color';
+const pickIn=document.createElement('input'); pickIn.type='color'; pickIn.id='brushPicker'; pickIn.value='#7A4E2D';
+pickIn.oninput=e=>{ setBrushColor(e.target.value); erasing=false; syncBrush(); };
+pickBtn.appendChild(pickIn); dsw.appendChild(pickBtn);
+
+document.getElementById('brushSize').oninput=e=>{ brushSize=+e.target.value; syncBrush(); };
+document.getElementById('drawUndo').onclick=()=>{ if(!drawUndoStack.length){ toast('Nothing to undo'); return; }
+  dctx.putImageData(drawUndoStack.pop(),0,0); render(); };
+document.getElementById('drawClear').onclick=()=>{ if(!layers.includes(drawLayer)){ toast('Nothing to clear'); return; }
+  clearDrawing(); toast('Cleared drawing'); };
+
+/* background color = the bg layer's color (lives in the Draw tab) */
+const paperWrap=document.getElementById('paperSwatches');
+PAPERS.forEach(c=>{ const b=document.createElement('button'); b.type='button';
+  b.className='sw'+(c===bgLayer.color?' on':''); b.style.background=c; b.dataset.p=c;
+  b.onclick=()=>{ bgLayer.color=c; syncPaper(); render(); renderLayers(); };
+  paperWrap.appendChild(b); });
+function syncPaper(){ [...paperWrap.children].forEach(x=>x.classList.toggle('on',x.dataset.p===bgLayer.color)); }
+document.getElementById('blankBtn').onclick=()=>{ removeMonkey(); switchTab('draw'); toast('No monkey: draw your own 🐵'); };
+syncBrush(); syncPaper();
+
+/* ---------- mobile floating quick actions ---------- */
+const isMobile=()=>window.matchMedia('(max-width:880px)').matches;
+const QB_RANGE={text:[24,220],sticker:[60,520]};
+function qbResize(dir){ const L=getSel(); if(!L)return;
+  const r=QB_RANGE[L.type]||[24,220], step=Math.max(4,Math.round(L.size*0.12));
+  L.size=Math.min(r[1],Math.max(r[0],L.size+dir*step)); render(); syncControls(); }
+function qbRotate(deg){ const L=getSel(); if(!L)return; L.rot=(L.rot||0)+deg*D2R; render(); syncControls(); }
+function updateQuickbar(){ const L=getSel(); const on=!!L&&(L.type==='text'||L.type==='sticker')&&isMobile();
+  document.getElementById('quickbar').classList.toggle('show',on);
+  document.body.classList.toggle('qb-open',on); }
+document.getElementById('qbMinus').onclick=()=>qbResize(-1);
+document.getElementById('qbPlus').onclick=()=>qbResize(1);
+document.getElementById('qbRotL').onclick=()=>qbRotate(-15);
+document.getElementById('qbRotR').onclick=()=>qbRotate(15);
+document.getElementById('qbFront').onclick=bringFront;
+document.getElementById('qbDel').onclick=delSel;
+window.addEventListener('resize',updateQuickbar);
 
 /* ---------- export & share ---------- */
 function exportData(){ const keep=selected; selected=null; render();
@@ -521,5 +806,9 @@ let toastT;
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
   clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2200); }
 
+/* deep link: #draw opens straight into a blank sheet in draw mode (replaces the old MonkeyDraw page) */
+if(location.hash==='#draw'){ removeMonkey(); switchTab('draw'); }
+
+renderLayers();
 render();
 </script>
