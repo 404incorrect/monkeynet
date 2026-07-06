@@ -3,7 +3,7 @@
 
 Usage:  python add-monkeys.py
 """
-import os, io, glob, base64, sys
+import os, io, glob, base64, sys, subprocess
 
 try:
     from PIL import Image
@@ -55,10 +55,25 @@ def main():
         try: os.remove(f)
         except OSError: pass
     print("Added %d monkey(s). monkeys.js is now %.0f KB." % (len(uris), os.path.getsize(JS) / 1024))
-    print("Next:")
-    print("  git add monkeys.js")
-    print("  git commit -m 'add monkeys'")
-    print("  git push")
+    git_deploy(len(uris))
+
+
+def git_deploy(n):
+    """Commit monkeys.js and push, so the changes deploy."""
+    msg = "add %d monkey%s" % (n, "" if n == 1 else "s")
+    steps = [
+        ["git", "add", "monkeys.js"],
+        ["git", "commit", "-m", msg],
+        ["git", "push"],
+    ]
+    print("\nDeploying...")
+    for step in steps:
+        print("  $ " + " ".join(step))
+        result = subprocess.run(step, cwd=ROOT)
+        if result.returncode != 0:
+            print("  ! '%s' failed (exit %d). Stopping." % (" ".join(step), result.returncode))
+            return
+    print("Pushed. monkeynet.org will redeploy shortly.")
 
 if __name__ == "__main__":
     main()
