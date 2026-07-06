@@ -55,7 +55,10 @@ def main():
         try: os.remove(f)
         except OSError: pass
     print("Added %d monkey(s). monkeys.js is now %.0f KB." % (len(uris), os.path.getsize(JS) / 1024))
-    print("Next:  git add monkeys.js && git commit -m 'add monkeys' && git push")
+    print("Next:")
+    print("  git add monkeys.js")
+    print("  git commit -m 'add monkeys'")
+    print("  git push")
 
 if __name__ == "__main__":
     main()
