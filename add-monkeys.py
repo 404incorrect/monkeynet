@@ -3,12 +3,14 @@
 
 Usage:  python add-monkeys.py
 """
-import os, io, glob, base64, sys, subprocess
+import os
+import io
+import glob
+import base64
+import sys
+import subprocess
 
-try:
-    from PIL import Image
-except ImportError:
-    sys.exit("Pillow not installed. Run:  pip install Pillow")
+from PIL import Image
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 NEW_DIR = os.path.join(ROOT, "monkeys", "_new")
@@ -19,10 +21,9 @@ QUALITY = 78
 EXTS = ("*.png", "*.jpg", "*.jpeg", "*.gif", "*.webp", "*.PNG", "*.JPG", "*.JPEG")
 
 def collect():
-    files = []
-    for e in EXTS:
-        files += glob.glob(os.path.join(NEW_DIR, e))
-    return sorted(set(files))
+    # set() dedupes files matched by both *.jpg and *.JPG on case-insensitive
+    # filesystems; sorted() gives a stable append order.
+    return sorted({f for e in EXTS for f in glob.glob(os.path.join(NEW_DIR, e))})
 
 def encode(path):
     im = Image.open(path).convert("RGB")
@@ -41,26 +42,20 @@ def main():
         sys.exit("monkeys.js does not end with '];' — aborting to avoid corruption.")
     uris = []
     for f in files:
-        try:
-            uris.append(encode(f))
-            print("  +", os.path.basename(f))
-        except Exception as ex:
-            print("  ! skipped", os.path.basename(f), "-", ex)
-    if not uris:
-        return
-    entries = ",\n" + ",\n".join('"%s"' % u for u in uris)
-    content = content[:-2] + entries + "\n];\n"
+        uris.append(encode(f))
+        print(f"  + {os.path.basename(f)}")
+    entries = ",\n" + ",\n".join(f'"{u}"' for u in uris)
+    content = f"{content[:-2]}{entries}\n];\n"
     open(JS, "w", encoding="utf-8").write(content)
     for f in files:
-        try: os.remove(f)
-        except OSError: pass
-    print("Added %d monkey(s). monkeys.js is now %.0f KB." % (len(uris), os.path.getsize(JS) / 1024))
+        os.remove(f)
+    print(f"Added {len(uris)} monkey(s). monkeys.js is now {os.path.getsize(JS) / 1024:.0f} KB.")
     git_deploy(len(uris))
 
 
 def git_deploy(n):
     """Commit monkeys.js and push, so the changes deploy."""
-    msg = "add %d monkey%s" % (n, "" if n == 1 else "s")
+    msg = f"add {n} monkey{'' if n == 1 else 's'}"
     steps = [
         ["git", "add", "monkeys.js"],
         ["git", "commit", "-m", msg],
@@ -68,10 +63,10 @@ def git_deploy(n):
     ]
     print("\nDeploying...")
     for step in steps:
-        print("  $ " + " ".join(step))
+        print(f"  $ {' '.join(step)}")
         result = subprocess.run(step, cwd=ROOT)
         if result.returncode != 0:
-            print("  ! '%s' failed (exit %d). Stopping." % (" ".join(step), result.returncode))
+            print(f"  ! '{' '.join(step)}' failed (exit {result.returncode}). Stopping.")
             return
     print("Pushed. monkeynet.org will redeploy shortly.")
 
