@@ -82,7 +82,8 @@
   .monkeys{display:grid;gap:7px;grid-template-columns:repeat(3,1fr);grid-auto-rows:min-content;
     align-content:start;max-height:min(460px,42vh);overflow-y:auto;padding-right:4px}
   .monkeys.expanded{max-height:min(900px,60vh)}
-  .stickers{display:grid;gap:8px;grid-template-columns:repeat(4,1fr)}
+  .stickers{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));
+    max-height:340px;overflow-y:auto;padding-right:4px}
   .mk{aspect-ratio:1;border-radius:10px;border:2px solid transparent;overflow:hidden;
     cursor:pointer;background:#000;padding:0;min-width:0;min-height:0}
   .mk.on{border-color:var(--banana)}
@@ -421,7 +422,22 @@ function paintUp(){ if(painting){ painting=false; lastPt=null; render(); } }
 
 const FILLS   = ['#FFFFFF','#000000','#F5C518','#E5563C','#3FA34D','#4A90E2','#E24AB7'];
 const STROKES = ['#000000','#FFFFFF','#3FA34D','#E5563C','#5A3A1A'];
-const STICKERS = ['\u{1F34C}','\u{1F435}','\u{1F648}','\u{1F64A}','\u{1F649}','\u{1F98D}','\u{1F334}','\u{1F965}','\u{1F451}','\u{1F525}','\u{1F480}','\u2728','\u{1F60E}','\u{1F4A9}','\u2764\uFE0F','\u2B50','\u{1F4AF}'];
+const STICKERS = [
+  /* primates */
+  '\u{1F435}','\u{1F412}','\u{1F98D}','\u{1F9A7}','\u{1F648}','\u{1F649}','\u{1F64A}',
+  /* jungle */
+  '\u{1F34C}','\u{1F965}','\u{1F334}','\u{1F333}','\u{1F33F}','\u{1F340}','\u{1F338}','\u{1F30B}','\u{1F41B}','\u{1F98B}','\u{1F40D}','\u{1F438}','\u{1F99C}','\u{1F9A9}','\u{1F406}','\u{1F418}','\u{1F996}',
+  /* faces */
+  '\u{1F60E}','\u{1F602}','\u{1F62D}','\u{1F621}','\u{1F92F}','\u{1F97A}','\u{1F60D}','\u{1F644}','\u{1F914}','\u{1F92B}','\u{1F971}','\u{1F480}','\u{1F47D}','\u{1F921}','\u{1F47B}','\u{1F916}','\u{1F63B}',
+  /* reactions */
+  '\u2764\uFE0F','\u{1F494}','\u2728','\u{1F525}','\u{1F4A5}','\u{1F4AB}','\u2B50','\u{1F4AF}','\u2705','\u274C','\u2757','\u2753','\u{1F4A4}','\u{1F4A8}','\u{1F4A9}',
+  /* hands */
+  '\u{1F44D}','\u{1F44E}','\u{1F44F}','\u{1F64C}','\u{1F450}','\u{1F919}','\u270C\uFE0F','\u{1F91D}','\u{1F4AA}',
+  /* stuff */
+  '\u{1F451}','\u{1F576}\uFE0F','\u{1F3A9}','\u{1F3B8}','\u{1F3A4}','\u{1F3AE}','\u{1F4B0}','\u{1F48E}','\u{1F3C6}','\u{1F680}','\u{1F6F8}','\u{1F5FF}','\u{1F52E}','\u{1F4F8}','\u{1F4FA}','\u{1F4BE}','\u{1F4A1}','\u{1F9EA}','\u{1F9E0}','\u{1F9FF}',
+  /* sky */
+  '\u{1F31E}','\u{1F31C}','\u2601\uFE0F','\u26A1','\u{1F308}','\u{1F327}\uFE0F'
+];
 const MONKEYS = window.MONKEYS || [];
 
 const CAPTIONS = [
