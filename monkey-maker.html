@@ -563,17 +563,27 @@ function syncControls(){
     const deg=Math.round((L.rot||0)/D2R);
     document.getElementById('rotRange').value=deg; document.getElementById('rotVal').textContent=deg+'\u00B0';
     document.getElementById('capsBtn').classList.toggle('on',L.caps);
-    paintSwatches('fillSw',FILLS,L.fill,c=>{L.fill=c;render();syncControls();});
-    paintSwatches('strokeSw',STROKES,L.stroke,c=>{L.stroke=c;render();syncControls();}); }
+    paintSwatches('fillSw',FILLS,L.fill,c=>{L.fill=c;render();syncControls();},true);
+    paintSwatches('strokeSw',STROKES,L.stroke,c=>{L.stroke=c;render();syncControls();},true); }
   if(isStk){ document.getElementById('stkSize').value=L.size;
     document.getElementById('stkSizeVal').textContent=L.size+'px';
     const deg=Math.round((L.rot||0)/D2R);
     document.getElementById('stkRot').value=deg; document.getElementById('stkRotVal').textContent=deg+'\u00B0'; }
   updateQuickbar();
 }
-function paintSwatches(id,colors,current,onPick){ const host=document.getElementById(id); host.innerHTML='';
+const pickers={};   // one live <input type=color> per swatch row, reused across repaints
+function paintSwatches(id,colors,current,onPick,withPick){ const host=document.getElementById(id); host.innerHTML='';
   colors.forEach(c=>{ const d=document.createElement('div'); d.className='sw'+(c===current?' on':'');
-    d.style.background=c; d.onclick=()=>onPick(c); host.appendChild(d); }); }
+    d.style.background=c; d.onclick=()=>onPick(c); host.appendChild(d); });
+  if(!withPick) return;
+  let p=pickers[id];
+  if(!p){ p=document.createElement('label'); p.className='sw pick'; p.title='Custom color';
+    const inp=document.createElement('input'); inp.type='color';
+    inp.oninput=e=>p.cb(e.target.value);
+    p.appendChild(inp); p.input=inp; pickers[id]=p; }
+  p.cb=onPick; p.input.value=current;
+  p.classList.toggle('on',!colors.includes(current));
+  host.appendChild(p); }
 
 /* ---------- tabs ---------- */
 function switchTab(name){ document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.t===name));
