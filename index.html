@@ -23,14 +23,56 @@
 <meta name="twitter:image:alt" content="I monkey, U monkey, together we climb">
 <style>
   :root{--bg:#12160F;--panel:#1B231D;--panel2:#252E27;--ink:#F5F2E9;--muted:#AFC1B4;
-    --banana:#F2D479;--jungle:#67C389;--line:#37463C}
+    --banana:#F2D479;--jungle:#67C389;--line:#37463C;--sky:transparent}
+  /* Weather in the canopy: the hub drifts with the visitor's own clock and sky. */
+  html[data-sky="dawn"]{--bg:#191510;--sky:radial-gradient(120% 80% at 50% 100%,rgba(242,180,120,.13),transparent 70%)}
+  html[data-sky="dusk"]{--bg:#181209;--sky:radial-gradient(120% 80% at 50% 100%,rgba(226,122,74,.15),transparent 70%)}
+  html[data-sky="night"]{--bg:#080B08;--line:#2C382F;--muted:#93A698;
+    --sky:radial-gradient(120% 90% at 50% 0%,rgba(64,92,140,.16),transparent 72%)}
   *{box-sizing:border-box}
   html,body{margin:0;background:var(--bg);color:var(--ink);
-    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow-x:hidden}
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow-x:hidden;
+    transition:background-color 1.2s linear}
   a{color:inherit;text-decoration:none}
-  .canopy{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+  .canopy{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;background:var(--sky)}
   .nana{position:absolute;bottom:-60px;opacity:.4;animation:rise linear infinite}
   @keyframes rise{0%{transform:translateY(0) rotate(0)}100%{transform:translateY(-118vh) rotate(330deg)}}
+
+  /* A storm rolls through now and then. The bananas come down instead of up. */
+  .canopy.storm .nana{bottom:auto;top:-80px;animation-name:fall}
+  @keyframes fall{0%{transform:translateY(0) rotate(0)}100%{transform:translateY(118vh) rotate(400deg)}}
+
+  /* Clouds are always up there, barely. A storm just thickens them. */
+  .cloud{position:absolute;border-radius:50%;filter:blur(34px);opacity:.05;
+    background:radial-gradient(closest-side,rgba(214,226,218,.6),transparent 74%);
+    transition:opacity 7s ease;animation:roll linear infinite}
+  .canopy.storm .cloud{opacity:.3}
+  html[data-sky="night"] .cloud{background:radial-gradient(closest-side,rgba(150,172,196,.5),transparent 74%)}
+  html[data-sky="dusk"] .cloud{background:radial-gradient(closest-side,rgba(226,158,116,.5),transparent 74%)}
+  @keyframes roll{0%{transform:translateX(-40vw)}100%{transform:translateX(140vw)}}
+
+  /* Lightning. Rare, brief, two-stage like the real thing. */
+  .flash{position:absolute;inset:0;opacity:0;background:rgba(200,218,255,.55)}
+  .flash.strike{animation:strike .9s ease-out}
+  @keyframes strike{0%{opacity:0}5%{opacity:.5}11%{opacity:.04}18%{opacity:.36}30%{opacity:.02}100%{opacity:0}}
+
+  /* Motes: fireflies at night, embers at dusk, dew at dawn, pollen by day.
+     Same drifting-and-glowing machinery, retuned per phase from JS. */
+  .mote{position:absolute;border-radius:50%;
+    animation:drift ease-in-out infinite,blink ease-in-out infinite}
+  .flutter{position:absolute;animation:drift ease-in-out infinite}
+  @keyframes drift{0%,100%{transform:translate(0,0)}
+    25%{transform:translate(var(--dx),var(--dy))}
+    50%{transform:translate(calc(var(--dx) * -.6),calc(var(--dy) * .8))}
+    75%{transform:translate(calc(var(--dx) * .4),calc(var(--dy) * -1.1))}}
+  @keyframes blink{0%,100%{opacity:var(--dim)}
+    45%{opacity:var(--lit)}62%{opacity:calc(var(--dim) + .12)}}
+
+  @media(prefers-reduced-motion:reduce){
+    .nana,.cloud,.flutter{animation:none}
+    .mote{animation:blink 7s ease-in-out infinite}
+    .flash.strike{animation:none}
+  }
   .wrap{position:relative;z-index:1;max-width:1040px;margin:0 auto;padding:26px 20px 80px}
   .nav{display:flex;align-items:center;gap:16px;margin-bottom:30px}
   .brand{font-family:Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif;font-size:26px;letter-spacing:.5px;
@@ -136,16 +178,106 @@
 
 <script src="monkeys.js"></script>
 <script>
+/* ── Weather in the canopy ──────────────────────────────────────────────
+   Time of day comes from the visitor's own clock. Storms come from nowhere,
+   on their own schedule, like the ones at the Rainforest Cafe. */
 const canopy=document.getElementById('canopy');
-const emojis=['🍌','🐵','🍌','🍌','🙈'];
-for(let i=0;i<16;i++){ const s=document.createElement('span'); s.className='nana';
-  s.textContent=emojis[i%emojis.length];
-  s.style.left=Math.random()*100+'vw';
-  s.style.fontSize=(18+Math.random()*26)+'px';
-  s.style.animationDuration=(9+Math.random()*12)+'s';
-  s.style.animationDelay=(-Math.random()*18)+'s';
-  s.style.opacity=(0.2+Math.random()*0.35);
-  canopy.appendChild(s); }
+const rnd=(lo,hi)=>lo+Math.random()*(hi-lo);
+const clear=sel=>canopy.querySelectorAll(sel).forEach(el=>el.remove());
+
+function phase(h){ if(h<5||h>=20)return'night'; if(h<8)return'dawn'; if(h<17)return'day'; return'dusk'; }
+
+/* Each hour of the day gets its own drifting thing. n/size/glow shape the mote;
+   dim+lit set how hard it pulses; bug is the creature that flies through it. */
+const SKIES={
+  dawn: {n:20,size:3,glow:6,color:'220,236,246',dim:.16,lit:.5, blink:[6,13], drift:[20,38],bug:'',   bugs:0},
+  day:  {n:14,size:3,glow:4,color:'242,227,160',dim:.12,lit:.38,blink:[7,15], drift:[22,40],bug:'🦋',bugs:5},
+  dusk: {n:18,size:4,glow:8,color:'242,183,126',dim:.2, lit:.68,blink:[5,11], drift:[18,34],bug:'🦇',bugs:3},
+  night:{n:24,size:5,glow:9,color:'220,242,133',dim:.12,lit:.9, blink:[2.2,6],drift:[14,30],bug:'',   bugs:0},
+};
+
+function motes(cfg){
+  clear('.mote,.flutter');
+  for(let i=0;i<cfg.n;i++){ const m=document.createElement('span'); m.className='mote';
+    m.style.cssText=`width:${cfg.size}px;height:${cfg.size}px;background:rgb(${cfg.color});`+
+      `box-shadow:0 0 ${cfg.glow}px 2px rgba(${cfg.color},.5)`;
+    m.style.left=rnd(0,100)+'vw'; m.style.top=rnd(10,95)+'vh';
+    m.style.setProperty('--dx',rnd(-70,70)+'px');
+    m.style.setProperty('--dy',rnd(-60,60)+'px');
+    m.style.setProperty('--dim',cfg.dim); m.style.setProperty('--lit',cfg.lit);
+    m.style.animationDuration=rnd(...cfg.drift)+'s, '+rnd(...cfg.blink)+'s';
+    m.style.animationDelay=-rnd(0,20)+'s, '+-rnd(0,6)+'s';
+    canopy.appendChild(m); }
+
+  for(let i=0;i<cfg.bugs;i++){ const b=document.createElement('span'); b.className='flutter';
+    b.textContent=cfg.bug;
+    b.style.left=rnd(0,95)+'vw'; b.style.top=rnd(8,90)+'vh';
+    b.style.fontSize=rnd(14,24)+'px'; b.style.opacity=rnd(.3,.65);
+    b.style.setProperty('--dx',rnd(-160,160)+'px');
+    b.style.setProperty('--dy',rnd(-120,120)+'px');
+    b.style.animationDuration=rnd(16,32)+'s';
+    b.style.animationDelay=-rnd(0,20)+'s';
+    canopy.appendChild(b); }
+}
+
+function bananas(storm){
+  clear('.nana');
+  const emojis=['🍌','🐵','🍌','🍌','🙈'];
+  const n=storm?30:16;
+  for(let i=0;i<n;i++){ const s=document.createElement('span'); s.className='nana';
+    // A storm thins the menagerie: mostly bananas, falling.
+    s.textContent=storm?(Math.random()<.85?'🍌':emojis[i%emojis.length]):emojis[i%emojis.length];
+    s.style.left=rnd(0,100)+'vw';
+    s.style.fontSize=rnd(18,44)+'px';
+    s.style.animationDuration=(storm?rnd(4,8):rnd(9,21))+'s';
+    s.style.animationDelay=-rnd(0,18)+'s';
+    s.style.opacity=storm?rnd(.35,.75):rnd(.2,.55);
+    canopy.appendChild(s); }
+}
+
+/* Clouds are built once and just keep rolling; the storm only changes how
+   much you can see them. */
+function clouds(){
+  for(let i=0;i<6;i++){ const c=document.createElement('span'); c.className='cloud';
+    const w=rnd(260,520);
+    c.style.width=w+'px'; c.style.height=w*rnd(.35,.55)+'px';
+    c.style.top=rnd(-6,55)+'vh'; c.style.left='0';
+    c.style.animationDuration=rnd(70,150)+'s';
+    c.style.animationDelay=-rnd(0,140)+'s';
+    canopy.appendChild(c); }
+}
+
+const flash=document.createElement('span'); flash.className='flash';
+
+let storm=false,shown='';
+function render(){
+  const sky=phase(new Date().getHours());
+  document.documentElement.dataset.sky=sky;
+  canopy.classList.toggle('storm',storm);
+  bananas(storm);
+  // Only respawn the motes when the sky itself changes, so a passing storm
+  // doesn't make every firefly jump to a new spot.
+  if(sky!==shown){ motes(SKIES[sky]); shown=sky; }
+}
+
+function lightning(){
+  if(!storm) return;
+  flash.classList.remove('strike'); void flash.offsetWidth; flash.classList.add('strike');
+  setTimeout(lightning,rnd(4,14)*1000);
+}
+function beginStorm(){
+  storm=true; render();
+  setTimeout(lightning,rnd(2,8)*1000);
+  setTimeout(()=>{ storm=false; render(); scheduleStorm(); },rnd(35,80)*1000);
+}
+function scheduleStorm(){ setTimeout(beginStorm,rnd(90,260)*1000); }
+
+clouds();
+canopy.appendChild(flash);
+render();
+setInterval(render,5*60*1000);  // catch the visitor sitting through a sunset
+// One visitor in six walks straight into a storm; everyone else waits for one.
+Math.random()<1/6 ? beginStorm() : scheduleStorm();
 const hp=document.getElementById('heroPic');
 window.addEventListener('mousemove',e=>{ const x=(e.clientX/innerWidth-.5), y=(e.clientY/innerHeight-.5);
   hp.style.transform='rotate('+(x*5)+'deg) translate('+(x*10)+'px,'+(y*10)+'px)'; });
