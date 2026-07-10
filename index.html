@@ -42,14 +42,16 @@
   .canopy.storm .nana{bottom:auto;top:-80px;animation-name:fall}
   @keyframes fall{0%{transform:translateY(0) rotate(0)}100%{transform:translateY(118vh) rotate(400deg)}}
 
-  /* Clouds are always up there, barely. A storm just thickens them. */
-  .cloud{position:absolute;border-radius:50%;filter:blur(34px);opacity:.05;
-    background:radial-gradient(closest-side,rgba(214,226,218,.6),transparent 74%);
+  /* Clouds are always up there, barely. A storm just thickens them.
+     Each one is a bank of overlapping puffs, blurred until it loses its edges:
+     a single ellipse just reads as an orb sliding across the screen. */
+  .cloud{position:absolute;opacity:.04;filter:blur(44px);
     transition:opacity 7s ease;animation:roll linear infinite}
-  .canopy.storm .cloud{opacity:.3}
-  html[data-sky="night"] .cloud{background:radial-gradient(closest-side,rgba(150,172,196,.5),transparent 74%)}
-  html[data-sky="dusk"] .cloud{background:radial-gradient(closest-side,rgba(226,158,116,.5),transparent 74%)}
-  @keyframes roll{0%{transform:translateX(-40vw)}100%{transform:translateX(140vw)}}
+  .puff{position:absolute;border-radius:50%;background:var(--puff,rgba(214,226,218,.55))}
+  .canopy.storm .cloud{opacity:.22}
+  html[data-sky="night"]{--puff:rgba(150,172,196,.5)}
+  html[data-sky="dusk"]{--puff:rgba(226,158,116,.5)}
+  @keyframes roll{0%{transform:translateX(-60vw)}100%{transform:translateX(160vw)}}
 
   /* Lightning. Rare, brief, two-stage like the real thing. */
   .flash{position:absolute;inset:0;opacity:0;background:rgba(200,218,255,.55)}
@@ -255,12 +257,23 @@ function bananas(storm){
 /* Clouds are built once and just keep rolling; the storm only changes how
    much you can see them. */
 function clouds(){
-  for(let i=0;i<6;i++){ const c=document.createElement('span'); c.className='cloud';
-    const w=rnd(260,520);
-    c.style.width=w+'px'; c.style.height=w*rnd(.35,.55)+'px';
-    c.style.top=rnd(-6,55)+'vh'; c.style.left='0';
-    c.style.animationDuration=rnd(70,150)+'s';
-    c.style.animationDelay=-rnd(0,140)+'s';
+  for(let i=0;i<5;i++){ const c=document.createElement('span'); c.className='cloud';
+    const w=rnd(760,1300), h=rnd(130,210);
+    c.style.width=w+'px'; c.style.height=h+'px';
+    c.style.top=rnd(-10,34)+'vh'; c.style.left='0';
+    c.style.animationDuration=rnd(110,240)+'s';
+    c.style.animationDelay=-rnd(0,220)+'s';
+
+    // Puffs of assorted size strung along the bank, biggest in the middle,
+    // so the silhouette humps rather than reading as one flat lozenge.
+    const n=Math.round(rnd(5,8));
+    for(let j=0;j<n;j++){ const p=document.createElement('span'); p.className='puff';
+      const mid=1-Math.abs(j/(n-1)-.5)*2;           // 0 at the ends, 1 in the middle
+      const d=h*rnd(.75,1.15)*(.55+mid*.6);
+      p.style.width=d+'px'; p.style.height=d+'px';
+      p.style.left=(j/n)*w+rnd(-40,40)+'px';
+      p.style.top=(h-d)*rnd(.25,.85)+'px';
+      c.appendChild(p); }
     canopy.appendChild(c); }
 }
 
