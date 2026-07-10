@@ -200,7 +200,10 @@
   .vid-sub{font-family:Georgia,ui-serif,serif;font-style:italic;color:var(--muted);text-align:center;
     font-size:14.5px;margin:0 0 14px}
   .vid{display:block;width:100%;position:relative;aspect-ratio:16/9;border-radius:14px;overflow:hidden;
-    border:1px solid var(--line);background:#000;object-fit:cover;
+    border:1px solid var(--line);background:#000;padding:0;appearance:none;cursor:pointer;
+    box-shadow:0 0 0 1px rgba(255,220,150,.12) inset,0 0 30px rgba(255,160,70,.14),0 12px 30px rgba(0,0,0,.46)}
+  .vid:focus-visible{outline:2px solid var(--flame);outline-offset:3px}
+  .vid-frame{display:block;width:100%;aspect-ratio:16/9;border:0;border-radius:14px;
     box-shadow:0 0 0 1px rgba(255,220,150,.12) inset,0 0 30px rgba(255,160,70,.14),0 12px 30px rgba(0,0,0,.46)}
   .vid-poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 35%}
   .vid::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
@@ -265,6 +268,7 @@
     <div class="rack" id="rack" aria-label="candles lit at the shrine"></div>
     <div class="controls">
       <button class="btn gold" id="lightBtn">Light a candle</button>
+      <p class="tally" id="tally" aria-live="polite"></p>
     </div>
   </div>
 
@@ -309,11 +313,15 @@
   <div class="videowrap">
     <div class="vid-kicker">Before he was a symbol</div>
     <p class="vid-sub">The morning the zoo announced his name. He was small, and it was just good news.</p>
-    <video class="vid" controls preload="metadata" playsinline poster="harambe/harambe-baby.jpg">
-      <source src="harambe/harambe-naming.mp4" type="video/mp4">
-      Your browser can't play this clip.
-      <a href="https://www.youtube.com/watch?v=Dx3bMpLMY4U" target="_blank" rel="noopener">Watch it on YouTube</a>.
-    </video>
+    <button class="vid" id="vidBtn" type="button"
+      aria-label="Play the clip: the morning the zoo announced his name (opens YouTube)">
+      <img class="vid-poster" src="harambe/harambe-baby.jpg" alt="Harambe as an infant gorilla" loading="lazy">
+      <span class="vid-play" aria-hidden="true"></span>
+      <span class="vid-badge">YouTube</span>
+    </button>
+    <noscript>
+      <p class="credit"><a href="https://www.youtube.com/watch?v=Dx3bMpLMY4U" target="_blank" rel="noopener">Watch it on YouTube</a>.</p>
+    </noscript>
   </div>
 
   <p class="cousins">Apes aren't monkeys, but they're up in the same canopy. If you want to do more
@@ -358,22 +366,45 @@
     return c;
   }
 
+  // the clip stays a still frame until asked for. nothing loads from youtube before then.
+  document.getElementById('vidBtn').addEventListener('click',function(){
+    const f=document.createElement('iframe');
+    f.className='vid-frame';
+    f.src='https://www.youtube-nocookie.com/embed/Dx3bMpLMY4U?autoplay=1&rel=0';
+    f.title='The morning the zoo announced his name';
+    f.allow='accelerometer;autoplay;encrypted-media;picture-in-picture;fullscreen';
+    f.allowFullscreen=true;
+    f.referrerPolicy='strict-origin-when-cross-origin';
+    this.replaceWith(f);
+    f.focus();
+  });
+
   const rack=document.getElementById('rack');
-  const CAP=80; // don't overflow the rack
+  const tally=document.getElementById('tally');
+  const CAP=80;  // don't overflow the rack
+  const REST=6;  // candles already burning when you arrive
 
   // personal, ephemeral count. yours, no one else's.
   let candles=Math.max(0,parseInt(localStorage.getItem('shrine_candles')||'0',10)||0);
 
-  function seedCandles(n){
-    // always show a small resting glow even on a first visit
-    const base=Math.max(6,Math.min(CAP,n));
-    for(let i=0;i<base;i++) rack.appendChild(makeCandle());
+  // the rack always shows the resting glow plus everything you've lit, up to the cap
+  const lit=()=>Math.min(CAP,REST+candles);
+
+  function sayTally(){
+    tally.textContent = candles===0 ? ''
+      : candles===1 ? 'One candle, lit by you.'
+      : candles>=CAP-REST ? 'The rack is full. He is well remembered.'
+      : candles+' candles, lit by you.';
   }
 
-  seedCandles(candles);
+  for(let i=0;i<lit();i++) rack.appendChild(makeCandle());
+  sayTally();
 
   document.getElementById('lightBtn').addEventListener('click',()=>{
-    if(rack.children.length<CAP) rack.appendChild(makeCandle());
-    candles++; localStorage.setItem('shrine_candles',candles);
+    const before=lit();
+    candles++;
+    localStorage.setItem('shrine_candles',candles);
+    if(lit()>before) rack.appendChild(makeCandle());
+    sayTally();
   });
 </script>
