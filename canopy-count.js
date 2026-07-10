@@ -1,5 +1,6 @@
 /* ── Canopy Count ──────────────────────────────────────────────────────
-   One swing per browser session. Come back tomorrow and you count again.
+   Every load is a swing. Refresh it and the number climbs, the way the
+   old counters did, shamelessly.
 
    The tally lives in a Supabase row that nothing can touch directly: RLS
    is on with no policies, so the publishable key below can only reach it
@@ -16,17 +17,7 @@
   var num = document.getElementById('canopyN');
   if (!box || !num) return;
 
-  // Already swung this session? Read the tally instead of bumping it.
-  var fn = 'bump_canopy';
-  try {
-    if (sessionStorage.getItem('canopy-swung')) fn = 'canopy_count';
-    else sessionStorage.setItem('canopy-swung', '1');
-  } catch (e) {
-    // Private mode with storage walled off: just read, never double-count.
-    fn = 'canopy_count';
-  }
-
-  fetch(URL_ + '/rest/v1/rpc/' + fn, {
+  fetch(URL_ + '/rest/v1/rpc/bump_canopy', {
     method: 'POST',
     headers: {
       apikey: KEY,
