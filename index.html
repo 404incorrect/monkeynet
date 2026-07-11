@@ -84,6 +84,44 @@
   .nav .links{margin-left:auto;display:flex;gap:18px;font-size:14px;font-weight:600;color:var(--muted)}
   .nav .links a:hover{color:var(--banana)}
 
+  /* The Canopy Wire: one hand-strung line of everything new across the site.
+     Full-bleed and a little scruffy on purpose, so it reads as part of the
+     canopy and not a SaaS changelog. Seeds with static pointers (works with
+     no JS / offline), then fills itself from the Gallery, the Climb Log and
+     MonkeyNews on every load. */
+  /* Overscaled past the viewport and rotated a hair, so it hangs like a
+     hand-strung banner without exposing background at the corners. */
+  .marquee{position:relative;z-index:1;width:106vw;margin:16px calc(50% - 53vw) 40px;
+    padding:0 3vw;display:flex;align-items:center;transform:rotate(-1.2deg);
+    background:linear-gradient(90deg,rgba(103,195,137,.06),rgba(242,212,121,.05));
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .mq-tag{flex:none;display:inline-flex;align-items:center;gap:8px;padding:0 18px;
+    font-family:Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif;letter-spacing:.02em;
+    text-transform:uppercase;font-size:15px;color:var(--banana);transform:rotate(-3deg)}
+  .mq-monkey{display:inline-block;font-size:19px;transform-origin:50% 15%;
+    animation:mq-swing 2.6s ease-in-out infinite}
+  @keyframes mq-swing{0%,100%{transform:rotate(-18deg)}50%{transform:rotate(18deg)}}
+  .marquee-view{position:relative;overflow:hidden;flex:1;
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 30px,#000 calc(100% - 30px),transparent);
+            mask-image:linear-gradient(90deg,transparent,#000 30px,#000 calc(100% - 30px),transparent)}
+  .marquee-track{display:inline-flex;align-items:center;white-space:nowrap;
+    will-change:transform;animation:mq-scroll 60s linear infinite}
+  .marquee:hover .marquee-track,.marquee:focus-within .marquee-track{animation-play-state:paused}
+  @keyframes mq-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  /* Editorial serif, same voice as the dispatches and the rungs — not UI text. */
+  .mq-item{display:inline-flex;align-items:baseline;gap:9px;padding:11px 2px;
+    font-family:Georgia,ui-serif,serif;font-size:14.5px;color:var(--ink)}
+  .mq-item:hover{color:var(--banana)}
+  .mq-ico{font-size:14px;flex:none;align-self:center;opacity:.9}
+  .mq-age{font-family:ui-sans-serif,system-ui,sans-serif;color:var(--muted);opacity:.7;
+    font-weight:700;font-size:11px;flex:none}
+  .mq-sep{flex:none;font-size:15px;padding:0 14px;align-self:center;transform:translateY(-1px)}
+  @media(max-width:680px){.mq-tag span:last-child{display:none}.mq-tag{padding:0 13px}}
+  @media(prefers-reduced-motion:reduce){
+    .marquee-track,.mq-monkey{animation:none}
+    .marquee-view{overflow-x:auto}
+  }
+
   .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:24px;align-items:center;margin:10px 0 44px}
   @media(max-width:760px){.hero{grid-template-columns:1fr;text-align:center}}
   .ticker{display:inline-block;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
@@ -109,6 +147,8 @@
     display:block;transition:transform .15s,border-color .15s}
   .card:hover{transform:translateY(-4px);border-color:var(--banana)}
   .card .ico{font-size:30px}
+  .card .ico img{display:block;height:44px;width:auto;object-fit:contain}
+  .card .ico img.px{image-rendering:pixelated}
   .card h3{margin:10px 0 6px;font-size:20px}
   .card p{margin:0;color:var(--muted);font-size:14px;line-height:1.55}
   .card .tag{display:inline-block;margin-top:12px;font-size:12px;font-weight:800;color:var(--jungle)}
@@ -140,6 +180,21 @@
     </div>
   </div>
 
+  <!-- The Canopy Wire — live strip of the latest across the whole site.
+       Seed items below are the offline fallback; the script fills it live.
+       Note the trailing separator so the duplicated loop seams cleanly. -->
+  <div class="marquee" id="marquee" aria-label="Latest across MonkeyNet">
+    <div class="mq-tag"><span class="mq-monkey">🐒</span><span>just swung in</span></div>
+    <div class="marquee-view">
+      <div class="marquee-track" id="mqTrack">
+        <a class="mq-item" href="monkey-gallery.html"><span class="mq-ico">🖼️</span><span class="mq-text">New monkeys on the shared wall</span></a><span class="mq-sep">🍌</span>
+        <a class="mq-item" href="climb-log.html"><span class="mq-ico">🌿</span><span class="mq-text">What the canopy has built, in order</span></a><span class="mq-sep">🍃</span>
+        <a class="mq-item" href="monkey-news.html"><span class="mq-ico">📰</span><span class="mq-text">Real dispatches on real monkeys</span></a><span class="mq-sep">🍌</span>
+        <a class="mq-item" href="monkey-shrine.html"><span class="mq-ico">🕯️</span><span class="mq-text">A candle kept lit for Harambe</span></a><span class="mq-sep">🍃</span>
+      </div>
+    </div>
+  </div>
+
   <div class="hero">
     <div>
       <div class="ticker">I Monkey, Therefore We Climb.</div>
@@ -167,13 +222,13 @@
       <span class="tag">Get on the wall →</span>
     </a>
     <a class="card" href="monkey-news.html">
-      <div class="ico">📰</div>
+      <div class="ico"><img src="ape-think.png" alt="a thinking ape" width="54" height="44"></div>
       <h3>MonkeyNews</h3>
       <p>The Canopy Wire: real dispatches on real monkeys out in the world, links out to every source.</p>
       <span class="tag">Read the wire →</span>
     </a>
     <a class="card" href="monkey-shrine.html">
-      <div class="ico">🕯️</div>
+      <div class="ico"><img class="px" src="heart-wings.gif" alt="a winged heart" width="44" height="44"></div>
       <h3>MonkeyShrine</h3>
       <p>A candle kept lit for Harambe. Light one, leave a banana, set the ache down somewhere quiet.</p>
       <span class="tag">Pay respects →</span>
@@ -324,4 +379,127 @@ if(gallery.length){
   setInterval(()=>{ heroImg.style.opacity=0;
     setTimeout(()=>{ heroImg.src=gallery[gi=(gi+1)%gallery.length]; heroImg.style.opacity=1; },350); },3000);
 }
+</script>
+
+<script>
+/* ── The Canopy Wire ────────────────────────────────────────────────────
+   One scrolling line pulling the newest thing from every corner of the site.
+   Three live sources, fetched in parallel on every load, so it keeps itself:
+     · the Gallery  — the Supabase wall, newest monkeys hung
+     · the Climb Log — commits tagged "log:", the site's own history
+     · MonkeyNews   — the latest dispatches, read straight off that page
+   The seed markup in the HTML is the fallback: if every source is asleep or
+   offline, the ticker still rolls with those evergreen pointers. */
+(function () {
+  var track = document.getElementById('mqTrack');
+  if (!track || !window.fetch) return;
+
+  var REPO = 'onehundredbeers/monkeynet';
+  var SUPA_URL = 'https://ucopubxejatgjgqmqnlu.supabase.co';
+  var SUPA_KEY = 'sb_publishable_P1clPSQ1JhkD2_yLtCpXFQ_BYN0Hhc6';
+
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function trim(s,n){ s=String(s).replace(/\s+/g,' ').trim();
+    return s.length>n ? s.slice(0,n-1).trim()+'…' : s; }
+  function ago(ts){ if(!ts) return '';
+    var s=(Date.now()-ts)/1000; if(s<0)s=0;
+    if(s<3600) return Math.max(1,Math.floor(s/60))+'m';
+    if(s<86400) return Math.floor(s/3600)+'h';
+    if(s<604800) return Math.floor(s/86400)+'d';
+    return Math.floor(s/604800)+'w'; }
+
+  /* ---- source: the Gallery (Supabase) ---- */
+  function fromGallery(){
+    return fetch(SUPA_URL+'/rest/v1/posts?select=handle,caption,created_at&hidden=eq.false&order=created_at.desc&limit=6',
+      { headers:{ apikey:SUPA_KEY, Authorization:'Bearer '+SUPA_KEY } })
+      .then(function(r){ return r.ok ? r.json() : []; })
+      .then(function(rows){ return (Array.isArray(rows)?rows:[]).map(function(p){
+        var who = p.handle ? ('@'+p.handle) : 'a monkey';
+        var what = p.caption ? ('“'+trim(p.caption,40)+'”') : 'hung a fresh monkey';
+        return { icon:'🖼️', kind:'Gallery', cls:'gallery',
+          text: who+' · '+what, href:'monkey-gallery.html',
+          ts: Date.parse(p.created_at)||0 };
+      }); })
+      .catch(function(){ return []; });
+  }
+
+  /* ---- source: the Climb Log (commits tagged log:) ---- */
+  function fromClimb(){
+    return fetch('https://api.github.com/repos/'+REPO+'/commits?per_page=60',
+      { headers:{ Accept:'application/vnd.github+json' } })
+      .then(function(r){ return r.ok ? r.json() : []; })
+      .then(function(cs){
+        var out=[];
+        (Array.isArray(cs)?cs:[]).forEach(function(c){
+          var msg=(c.commit&&c.commit.message)||'';
+          var subject=msg.split('\n')[0].replace(/^[^A-Za-z0-9]+/,'').trim();
+          if(!/^log:/i.test(subject)) return;
+          var title=subject.replace(/^log:\s*/i,'').trim();
+          if(!title || out.length>=6) return;
+          var date=((c.commit.author&&c.commit.author.date)||'');
+          out.push({ icon:'🌿', kind:'Climb Log', cls:'',
+            text:trim(title,72), href:'climb-log.html', ts:Date.parse(date)||0 });
+        });
+        return out;
+      })
+      .catch(function(){ return []; });
+  }
+
+  /* ---- source: MonkeyNews (read straight off the page) ---- */
+  function parseDateline(s){
+    s=String(s);
+    var m=s.match(/([A-Z][a-z]+ \d{1,2}, \d{4})/) || s.match(/([A-Z][a-z]+ \d{4})/);
+    return m ? (Date.parse(m[1])||0) : 0;
+  }
+  function fromNews(){
+    return fetch('monkey-news.html')
+      .then(function(r){ return r.ok ? r.text() : ''; })
+      .then(function(html){
+        if(!html) return [];
+        var doc=new DOMParser().parseFromString(html,'text/html');
+        var arts=[].slice.call(doc.querySelectorAll('article.wire')).slice(0,6);
+        return arts.map(function(a){
+          var h=(a.querySelector('h2')||{}).textContent||'';
+          var dl=(a.querySelector('.dateline')||{}).textContent||'';
+          return { icon:'📰', kind:'News', cls:'news',
+            text:trim(h,72), href:'monkey-news.html', ts:parseDateline(dl) };
+        });
+      })
+      .catch(function(){ return []; });
+  }
+
+  // Separators alternate banana / leaf, so the line reads like something
+  // strung up by hand rather than a row of tidy bullets.
+  var SEPS = ['🍌','🍃'];
+  function sepAt(i){ return '<span class="mq-sep">'+SEPS[i%2]+'</span>'; }
+
+  function itemHTML(it){
+    return '<a class="mq-item" href="'+it.href+'">'
+      + '<span class="mq-ico">'+it.icon+'</span>'
+      + '<span class="mq-text">'+esc(it.text)+'</span>'
+      + (it.ts ? '<span class="mq-age">· '+ago(it.ts)+'</span>' : '')
+      + '</a>';
+  }
+
+  // Two copies of one block back to back so translateX(-50%) loops seamlessly.
+  // The block ends in a separator, so the seam between copies looks like any
+  // other gap between items.
+  function mount(block){
+    track.innerHTML = block + block;
+    var count = (block.match(/mq-item/g)||[]).length;
+    track.style.animationDuration = Math.max(30, Math.min(90, count*7)) + 's';
+  }
+
+  Promise.all([ fromGallery(), fromClimb(), fromNews() ]).then(function(res){
+    var items = res[0].concat(res[1]).concat(res[2]);
+    if(!items.length) return;               // every source asleep — seed stands
+    items.sort(function(a,b){ return (b.ts||0) - (a.ts||0); });
+    items = items.slice(0, 16);
+    mount(items.map(function(it,i){ return itemHTML(it) + sepAt(i); }).join(''));
+  }).catch(function(){ /* the canopy keeps its own counsel */ });
+
+  // Duplicate the seed right away so the fallback loops seamlessly too.
+  mount(track.innerHTML);
+})();
 </script>
