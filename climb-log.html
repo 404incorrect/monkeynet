@@ -1,0 +1,265 @@
+<!-- MonkeyNet — The Climb Log -->
+<meta charset="utf-8">
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACAklEQVR4nN1Xu23DMBB9DDKBgUyQwgbUphO8AAdQa1fqUmgSFU6lNFKrAbSAoyJAWgNWkQkMOCMwRXwEdSZpyZSaPMCAefy84/F+Av4bujJVY9Y/zEE+RgkRSponcY9MyghNc+ityerWyROkAJFLGXnXNc3BqcRjiAJE/vT8osen7y8A6MmkBLK6te6/2wfo9iYRjW0y/lTBCkyFu54gT2IlxQqNOgIAFusUAKCUws/Hu1UmxQpIoLgvTGoBIa79zCYzcZcFsroVSKDf9Lwv9Nzp7fNKBgCNOlojYZI8QGHInY8iYtYwvBx8yQf9OUpIsyUiE7Yw8xETJnNCTjaEHJihFtgwey0gbF43+n+1qwYpEZyK6WCT3BxndSuyuhWDU3GexIp+531h3cTJh8ClRE8Bs7xKGaHaVc43HkPug1bAvNVyW4jlthA2kiFO5wPf/8DJ+Qbf+5ngTsfHLuhMKGWkmwafQuRcUkZquS168z7SrkwVpWqzOXFGAZHzBpPyO5Hfsg7N03raT3DWAiLmheTvoKJ3OFeaz+VJrLK6FYt1emVRqwWyuhVNc/BWMW6Z4FQ8Jra7MlVm6+3bc+tcbQFaQEnI9nHRlanKk1j5LDMW1kNs/b7rxr4bDrGq9xY+J7tFNPRJg81o1gvTy11yjqCG5LwvFMU1J6FxtavgKmoA8AtYgj+GI+VMFwAAAABJRU5ErkJggg==">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Climb Log · What MonkeyNet has built, in order</title>
+<meta name="description" content="A running history of MonkeyNet, rooted at the first commit and read from the ground up.">
+<link rel="canonical" href="https://monkeynet.org/climb-log.html">
+<!-- Open Graph -->
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="MonkeyNet">
+<meta property="og:url" content="https://monkeynet.org/climb-log.html">
+<meta property="og:title" content="The Climb Log">
+<meta property="og:description" content="I monkey, U monkey, together we climb. A running history of MonkeyNet, read from the ground up.">
+<meta property="og:image" content="https://monkeynet.org/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="I monkey, U monkey, together we climb">
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The Climb Log">
+<meta name="twitter:description" content="I monkey, U monkey, together we climb. A running history of MonkeyNet, read from the ground up.">
+<meta name="twitter:image" content="https://monkeynet.org/og-image.png">
+<meta name="twitter:image:alt" content="I monkey, U monkey, together we climb">
+<style>
+  :root{--bg:#12160F;--panel:#1B231D;--ink:#F5F2E9;--muted:#AFC1B4;
+    --banana:#F2D479;--jungle:#67C389;--line:#37463C}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  a{color:inherit;text-decoration:none}
+
+  .topbar{position:sticky;top:0;z-index:5;background:rgba(10,14,11,.86);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);padding:12px 20px;display:flex;align-items:center;gap:16px}
+  .brand{font-family:Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif;font-size:22px;
+    text-transform:uppercase;letter-spacing:.5px}
+  .brand .g{color:var(--jungle)}
+  .topbar a{color:var(--muted);font-weight:700;font-size:14px}
+  .topbar a:hover{color:var(--banana)}
+  .topbar .sp{margin-left:auto}
+
+  .wrap{max-width:720px;margin:0 auto;padding:26px 16px 90px}
+  .kicker{letter-spacing:.22em;text-transform:uppercase;font-size:12px;color:var(--jungle);
+    font-weight:800;margin-bottom:12px}
+  h1.mast{font-family:Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif;font-size:56px;
+    line-height:.94;margin:0 0 8px;text-transform:uppercase;letter-spacing:.5px}
+  h1.mast .g{color:var(--jungle)}
+  .tag-sub{font-family:Georgia,ui-serif,serif;font-style:italic;color:var(--muted);
+    font-size:18px;margin:0 0 18px}
+  .note{border-left:3px solid var(--banana);padding:8px 0 8px 16px;color:#EBE3CB;
+    font-size:14.5px;line-height:1.6;margin:0 0 8px}
+  .age{display:inline-flex;align-items:center;gap:8px;font-size:11.5px;font-weight:800;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--bg);background:var(--jungle);
+    padding:5px 12px;border-radius:999px;margin:14px 0 4px}
+  .rule{border:none;border-top:1px solid var(--line);margin:22px 0 6px}
+
+  /* The vine. It roots at the first commit and grows up the page, so the
+     newest rung sits highest and you read the history by climbing down. */
+  ol.vine{list-style:none;margin:26px 0 0;padding:0 0 0 30px;position:relative}
+  ol.vine:before{content:"";position:absolute;left:6px;top:10px;bottom:10px;width:2px;
+    background:linear-gradient(180deg,var(--jungle),var(--line))}
+  ol.vine li{position:relative;padding:0 0 30px 6px}
+  ol.vine li:before{content:"";position:absolute;left:-29px;top:7px;width:12px;height:12px;
+    border-radius:50%;background:var(--line);border:2px solid var(--bg)}
+  ol.vine li:first-child:before{background:var(--banana);
+    box-shadow:0 0 0 5px rgba(242,212,121,.16)}
+  ol.vine time{display:block;font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    font-weight:800;color:var(--muted);opacity:.75;margin-bottom:5px}
+  ol.vine li:first-child time{color:var(--banana);opacity:1}
+  ol.vine h2{font-family:Georgia,ui-serif,serif;font-size:20px;line-height:1.25;margin:0 0 6px}
+  ol.vine p{font-family:Georgia,ui-serif,serif;font-size:15.5px;line-height:1.6;
+    color:#E7E2D4;margin:0}
+  .ground{margin-top:6px;padding-left:6px;color:var(--muted);opacity:.6;font-size:12px;
+    letter-spacing:.16em;text-transform:uppercase;font-weight:800}
+
+  footer{margin-top:46px;text-align:center;color:var(--muted);font-size:13.5px;line-height:1.6}
+  footer .em{font-family:Georgia,ui-serif,serif;font-style:italic;color:#D6CFBC}
+</style>
+
+<div class="topbar">
+  <div class="brand">Climb<span class="g">Log</span></div>
+  <a href="index.html">Hub</a>
+  <a href="monkey-news.html">News</a>
+  <a href="monkey-maker.html">Maker</a>
+  <a href="monkeynet-writings.html" class="sp">Writings</a>
+</div>
+
+<div class="wrap">
+  <div class="kicker">MonkeyNet · The House Wire</div>
+  <h1 class="mast">The Climb<span class="g">Log</span></h1>
+  <p class="tag-sub">Dispatches from this canopy, the one you're standing in.</p>
+  <p class="note">MonkeyNews covers monkeys out in the world. This covers the site itself: every
+  branch it has grabbed since the first one. The vine roots at the bottom, on the day MonkeyNet
+  found something to hold onto, and grows up from there. Read it however you like, but it was
+  built to be climbed.</p>
+  <div class="age" id="age" hidden></div>
+
+  <hr class="rule">
+
+  <!-- Newest rung goes at the TOP. Keep it to a headline and a sentence or two. -->
+  <ol class="vine">
+    <li>
+      <time datetime="2026-07-09">July 9, 2026</time>
+      <h2>Weather came to the canopy</h2>
+      <p>The sky over the hub now drifts with your own clock: dawn, day, dusk, night. Sometimes it
+      storms, and when it storms, it rains bananas. Nobody asked for this.</p>
+    </li>
+    <li>
+      <time datetime="2026-07-09">July 9, 2026</time>
+      <h2>The Canopy Count started keeping score</h2>
+      <p>A hit counter, the way the old web kept track of who came by. Every visit is one swing.
+      The number only goes up, which is the whole point of a number like that.</p>
+    </li>
+    <li>
+      <time datetime="2026-07-09">July 9, 2026</time>
+      <h2>The shrine stopped sticking</h2>
+      <p>Candles at MonkeyShrine would freeze mid-flicker, and the video refused to be scrubbed.
+      Both let go. Harambe's candle burns properly now.</p>
+    </li>
+    <li>
+      <time datetime="2026-07-09">July 9, 2026</time>
+      <h2>MonkeyMaker grew a color wheel and 91 stickers</h2>
+      <p>Text fill and outline opened up to the whole spectrum, the sticker drawer went from a
+      handful to ninety-one, and the canvas quit blowing itself out on phones.</p>
+    </li>
+    <li>
+      <time datetime="2026-07-06">July 6, 2026</time>
+      <h2>MonkeyDraw folded into MonkeyMaker</h2>
+      <p>Two studios became one, with a single layer stack underneath. You can still draw on top of
+      a monkey, or start from nothing at all. Nothing was lost in the merge.</p>
+    </li>
+    <li>
+      <time datetime="2026-07-03">July 3, 2026</time>
+      <h2>MonkeyShrine opened</h2>
+      <p>A quiet page, a candle, a place to leave a banana. It has been ten years and it still sits
+      wrong. Light one if you need to.</p>
+    </li>
+    <li>
+      <time datetime="2026-07-02">July 2, 2026</time>
+      <h2>MonkeyNews began running the Canopy Wire</h2>
+      <p>Real dispatches on real monkeys out in the world, every one of them sourced and linked back
+      to the humans who reported it first.</p>
+    </li>
+    <li>
+      <time datetime="2026-07-02">July 2, 2026</time>
+      <h2>A paint pad appeared, and the Gallery took hand drawings</h2>
+      <p>MonkeyDraw arrived and wired itself straight into the wall. Draw a monkey, hang it up, no
+      account, no algorithm, no permission.</p>
+    </li>
+    <li>
+      <time datetime="2026-06-30">June 30, 2026</time>
+      <h2>The hero picture started cycling monkeys</h2>
+      <p>Pixel monkeys took over the cards, the palette softened, and the front page stopped
+      standing still.</p>
+    </li>
+    <li>
+      <time datetime="2026-06-29">June 29, 2026</time>
+      <h2>MonkeyNet found a branch and held on</h2>
+      <p>The first climb. One page, one idea, and a strong suspicion that the internet was supposed
+      to be a canopy the whole time.</p>
+    </li>
+  </ol>
+
+  <div class="ground">↓ the ground</div>
+
+  <footer>
+    <p class="em">Every rung was somebody deciding the canopy could be a little taller.</p>
+    <p>MonkeyNet · I monkey, therefore we climb · 🐵🍌</p>
+  </footer>
+</div>
+
+<script>
+/* Rooted at the first commit. The badge counts itself so nobody has to. */
+(function () {
+  var day = Math.floor((Date.now() - Date.parse('2026-06-29T00:00:00')) / 864e5) + 1;
+  var el = document.getElementById('age');
+  el.textContent = '🌿 Day ' + day + ' in the canopy';
+  el.hidden = false;
+})();
+
+/* ── The vine climbs itself ─────────────────────────────────────────────
+   The rungs above are the seed: the history, hand-written, always present
+   even with no JS. Past that, the log keeps itself. Any commit whose
+   subject starts with "log:" becomes a new rung, headline from the subject,
+   the sentence under it from the commit body. Push one and it appears at
+   the top on the next load. A leading emoji before "log:" is fine.
+
+   If GitHub is asleep or rate-limited, nothing happens and the seed stands. */
+(function () {
+  var REPO = 'onehundredbeers/monkeynet';
+  var ol = document.querySelector('ol.vine');
+  if (!ol || !window.fetch) return;
+
+  function keyOf(date, title) { return date + '|' + title.trim().toLowerCase(); }
+
+  // Remember what the seed already shows, so a tagged commit can't double up.
+  var shown = {};
+  Array.prototype.forEach.call(ol.querySelectorAll('li'), function (li) {
+    var t = li.querySelector('time'), h = li.querySelector('h2');
+    if (t && h) shown[keyOf(t.getAttribute('datetime'), h.textContent)] = true;
+  });
+
+  function fmt(date) {
+    return new Date(date + 'T12:00:00').toLocaleDateString(undefined,
+      { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+
+  function rungFrom(commit) {
+    var msg = (commit.commit && commit.commit.message) || '';
+    var lines = msg.split('\n');
+    // Drop a leading emoji/symbol run, then require the subject to start with log:
+    var subject = lines[0].replace(/^[^A-Za-z0-9]+/, '').trim();
+    if (!/^log:/i.test(subject)) return null;
+    var title = subject.replace(/^log:\s*/i, '').trim();
+    if (!title) return null;
+
+    var note = '';
+    var blank = msg.indexOf('\n\n');
+    if (blank >= 0) {
+      note = msg.slice(blank + 2).split('\n').filter(function (l) {
+        l = l.trim();
+        return l && !/^(co-authored-by|signed-off-by|co-committed-by):/i.test(l) && l.indexOf('🤖') !== 0;
+      }).join(' ').replace(/\s+/g, ' ').trim();
+    }
+
+    var date = ((commit.commit.author && commit.commit.author.date) || '').slice(0, 10);
+    if (!date) return null;
+    return { date: date, title: title, note: note };
+  }
+
+  function build(rung) {
+    var li = document.createElement('li');
+    var t = document.createElement('time');
+    t.setAttribute('datetime', rung.date);
+    t.textContent = fmt(rung.date);
+    var h = document.createElement('h2');
+    h.textContent = rung.title;
+    li.appendChild(t);
+    li.appendChild(h);
+    if (rung.note) {
+      var p = document.createElement('p');
+      p.textContent = rung.note;
+      li.appendChild(p);
+    }
+    return li;
+  }
+
+  fetch('https://api.github.com/repos/' + REPO + '/commits?per_page=100',
+    { headers: { Accept: 'application/vnd.github+json' } })
+    .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
+    .then(function (commits) {
+      if (!Array.isArray(commits)) return;
+      var anchor = ol.querySelector('li');   // the seed's current top
+      // API returns newest first; inserting each before the anchor keeps that order.
+      commits.forEach(function (c) {
+        var rung = rungFrom(c);
+        if (!rung) return;
+        var k = keyOf(rung.date, rung.title);
+        if (shown[k]) return;
+        shown[k] = true;
+        ol.insertBefore(build(rung), anchor);
+      });
+    })
+    .catch(function () { /* the canopy keeps its own counsel */ });
+})();
+</script>
