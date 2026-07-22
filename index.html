@@ -22,6 +22,15 @@
 <meta name="twitter:image" content="https://monkeynet.org/og-image.png">
 <meta name="twitter:image:alt" content="I monkey, U monkey, together we climb">
 <style>
+  /* Impact is missing on iOS/Android; Anton is the self-hosted stand-in so the
+     meme lettering looks the same on a phone as it does on a desktop. */
+  @font-face{font-family:'Anton';font-style:normal;font-weight:400;font-display:swap;
+    src:url('/fonts/anton-latin.woff2') format('woff2');
+    unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+  @font-face{font-family:'Anton';font-style:normal;font-weight:400;font-display:swap;
+    src:url('/fonts/anton-latin-ext.woff2') format('woff2');
+    unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+
   :root{--bg:#12160F;--panel:#1B231D;--panel2:#252E27;--ink:#F5F2E9;--muted:#AFC1B4;
     --banana:#F2D479;--jungle:#67C389;--line:#37463C;--sky:transparent}
   /* Weather in the canopy: the hub drifts with the visitor's own clock and sky. */
@@ -77,7 +86,7 @@
   }
   .wrap{position:relative;z-index:1;max-width:1040px;margin:0 auto;padding:26px 20px 80px}
   .nav{display:flex;align-items:center;gap:16px;margin-bottom:30px}
-  .brand{font-family:Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif;font-size:26px;letter-spacing:.5px;
+  .brand{font-family:Impact,Anton,Haettenschweiler,"Arial Narrow Bold",sans-serif;font-size:26px;letter-spacing:.5px;
     text-transform:uppercase;background:linear-gradient(180deg,#FBE7A6,#EBC56B);-webkit-background-clip:text;
     background-clip:text;color:transparent}
   .brand b{color:var(--jungle);-webkit-text-fill-color:var(--jungle)}
@@ -94,7 +103,7 @@
     background:linear-gradient(90deg,rgba(103,195,137,.06),rgba(242,212,121,.05));
     border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
   .mq-tag{flex:none;display:inline-flex;align-items:center;gap:8px;padding:0 18px;
-    font-family:Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif;letter-spacing:.02em;
+    font-family:Impact,Anton,Haettenschweiler,"Arial Narrow Bold",sans-serif;letter-spacing:.02em;
     text-transform:uppercase;font-size:15px;color:var(--banana);transform:rotate(-3deg)}
   .mq-monkey{display:inline-block;font-size:19px;transform-origin:50% 15%;
     animation:mq-swing 2.6s ease-in-out infinite}
@@ -124,7 +133,7 @@
   @media(max-width:760px){.hero{grid-template-columns:1fr;text-align:center}}
   .ticker{display:inline-block;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
     color:var(--bg);background:var(--banana);padding:6px 13px;border-radius:999px;margin-bottom:18px}
-  h1{font-family:Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif;font-size:72px;line-height:.92;
+  h1{font-family:Impact,Anton,Haettenschweiler,"Arial Narrow Bold",sans-serif;font-size:72px;line-height:.92;
     margin:0 0 16px;text-transform:uppercase;letter-spacing:.5px}
   @media(max-width:760px){h1{font-size:52px}}
   h1 .y{color:var(--banana)}h1 .g{color:var(--jungle)}

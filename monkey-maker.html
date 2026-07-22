@@ -21,6 +21,15 @@
 <meta name="twitter:description" content="I monkey, U monkey, together we climb. Pick a monkey, add impact text, and post it to the Gallery.">
 <meta name="twitter:image" content="https://monkeynet.org/og-image.png">
 <style>
+  /* Impact is missing on iOS/Android; Anton is the self-hosted stand-in so the
+     meme lettering looks the same on a phone as it does on a desktop. */
+  @font-face{font-family:'Anton';font-style:normal;font-weight:400;font-display:swap;
+    src:url('/fonts/anton-latin.woff2') format('woff2');
+    unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+  @font-face{font-family:'Anton';font-style:normal;font-weight:400;font-display:swap;
+    src:url('/fonts/anton-latin-ext.woff2') format('woff2');
+    unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+
   :root{
     --panel:rgba(30,37,32,.9); --panel2:rgba(40,48,42,.92); --line:rgba(242,212,121,.24);
     --banana:#F2D479; --jungle:#67C389; --jungle2:#4EA86C;
@@ -36,7 +45,7 @@
     background:linear-gradient(160deg,rgba(9,15,11,.78),rgba(7,11,9,.92));}
   .wrap{max-width:1180px;margin:0 auto;padding:18px 16px 60px;}
   header{display:flex;align-items:baseline;gap:12px;margin-bottom:18px;flex-wrap:wrap}
-  .logo{font-family:Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif;
+  .logo{font-family:Impact,Anton,Haettenschweiler,"Arial Narrow Bold",sans-serif;
     font-size:40px;letter-spacing:.5px;line-height:1;text-transform:uppercase;
     background:linear-gradient(180deg,#FBE7A6,#EBC56B);
     -webkit-background-clip:text;background-clip:text;color:transparent;
@@ -212,16 +221,13 @@
         <button class="btn ghost sm" id="blankBtn" style="margin-top:10px">No monkey: I'll draw one</button>
 
         <h3 style="margin-top:18px">Filter</h3>
-        <div class="toggle" id="filterRow">
-          <button data-f="none" class="on">None</button>
-          <button data-f="deepfry">Deep-fry</button>
-          <button data-f="saturate">Saturate</button>
-          <button data-f="bw">B&amp;W</button>
-        </div>
+        <div class="toggle" id="filterRow"></div>
         <div id="fryWrap" style="display:none">
-          <label>Fry level <span id="fryVal">70%</span></label>
+          <label><span id="fryLabel">Fry level</span> <span id="fryVal">70%</span></label>
           <input type="range" id="fryRange" min="20" max="100" value="70">
         </div>
+        <div class="hint">The heavier looks (oil paint, charcoal, swirl) redraw the whole
+          1080px canvas, so they take a beat to land on a phone.</div>
       </div>
 
       <!-- DRAW -->
@@ -264,7 +270,7 @@
           <textarea id="textInput" rows="2" placeholder="type something dumb (Enter = new line)"></textarea>
           <label>Font</label>
           <select id="fontSel">
-            <option value='Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif'>Impact (classic meme)</option>
+            <option value='Impact,Anton,Haettenschweiler,"Arial Narrow Bold",sans-serif'>Impact (classic meme)</option>
             <option value='"Comic Sans MS","Comic Sans",cursive'>Comic Sans</option>
             <option value='"Arial Black",Gadget,sans-serif'>Arial Black</option>
             <option value='"Times New Roman",Times,serif'>Times (deep-fried)</option>
@@ -435,7 +441,7 @@ const STICKERS = [
   /* hands */
   '\u{1F44D}','\u{1F44E}','\u{1F44F}','\u{1F64C}','\u{1F450}','\u{1F919}','\u270C\uFE0F','\u{1F91D}','\u{1F4AA}',
   /* stuff */
-  '\u{1F451}','\u{1F576}\uFE0F','\u{1F3A9}','\u{1F3B8}','\u{1F3A4}','\u{1F3AE}','\u{1F4B0}','\u{1F48E}','\u{1F3C6}','\u{1F680}','\u{1F6F8}','\u{1F5FF}','\u{1F52E}','\u{1F4F8}','\u{1F4FA}','\u{1F4BE}','\u{1F4A1}','\u{1F9EA}','\u{1F9E0}','\u{1F9FF}',
+  '\u{1F380}','\u{1F451}','\u{1F576}\uFE0F','\u{1F3A9}','\u{1F3B8}','\u{1F3A4}','\u{1F3AE}','\u{1F4B0}','\u{1F48E}','\u{1F3C6}','\u{1F680}','\u{1F6F8}','\u{1F5FF}','\u{1F52E}','\u{1F4F8}','\u{1F4FA}','\u{1F4BE}','\u{1F4A1}','\u{1F9EA}','\u{1F9E0}','\u{1F9FF}',
   /* sky */
   '\u{1F31E}','\u{1F31C}','\u2601\uFE0F','\u26A1','\u{1F308}','\u{1F327}\uFE0F'
 ];
@@ -515,33 +521,173 @@ function drawSelection(L){ if(L._hw==null)return; ctx.save();
   ctx.strokeStyle='#F5C518'; ctx.lineWidth=4; ctx.setLineDash([14,10]);
   ctx.strokeRect(-L._hw,-L._hh,L._hw*2,L._hh*2); ctx.restore(); }
 
-/* ---------- filters ---------- */
+/* ---------- filters ----------
+   The darkroom: the classic ImageMagick effects (-sepia-tone, -negate, -solarize,
+   -posterize, -vignette, -charcoal, -emboss, -edge, -paint, -swirl, -implode,
+   -blur, -sharpen), rewritten as plain canvas passes so everything stays local.
+   FX[f].amount is the label for the slider; a filter with no amount hides it. */
+const FX = {
+  none:     {label:'None'},
+  deepfry:  {label:'Deep-fry',  amount:'Fry level'},
+  saturate: {label:'Saturate'},
+  bw:       {label:'B&W'},
+  sepia:    {label:'Sepia'},
+  negate:   {label:'Negate'},
+  solarize: {label:'Solarize',  amount:'Threshold'},
+  posterize:{label:'Posterize', amount:'Levels'},
+  vignette: {label:'Vignette',  amount:'Falloff'},
+  charcoal: {label:'Charcoal',  amount:'Pressure'},
+  emboss:   {label:'Emboss'},
+  edge:     {label:'Edge',      amount:'Strength'},
+  paint:    {label:'Oil paint', amount:'Brush'},
+  swirl:    {label:'Swirl',     amount:'Twist'},
+  implode:  {label:'Implode',   amount:'Pull'},
+  blur:     {label:'Blur',      amount:'Radius'},
+  sharpen:  {label:'Sharpen',   amount:'Strength'}
+};
+const clamp255=v=>v<0?0:v>255?255:v;
+
 function applyFilter(){
   const f=state.filter; if(f==='none')return;
+  const amt=Math.max(.2,state.fryAmt/100);            // 0.2 - 1.0
+  if(f==='blur'){ return blurPass(1+11*amt); }
+  if(f==='swirl'||f==='implode'){ return warpPass(f,amt); }
+  if(f==='paint'){ return paintPass(Math.max(1,Math.round(1+4*amt))); }
+  if(f==='charcoal'||f==='emboss'||f==='edge'||f==='sharpen'){ return convPass(f,amt); }
+
   const img=ctx.getImageData(0,0,cv.width,cv.height), p=img.data;
-  const amt=f==='deepfry'?Math.max(.2,state.fryAmt/100):1;
-  const sat=f==='bw'?0:f==='saturate'?1.7:1+1.9*amt;
+  const sat=f==='bw'?0:f==='saturate'?1.7:f==='deepfry'?1+1.9*amt:1;
   const con=f==='deepfry'?1+1.1*amt:1;
   const warmth=f==='deepfry'?45*amt:0;
-  const levels=f==='deepfry'?Math.max(3,Math.round(8-5*amt)):0;
+  const levels=f==='deepfry'?Math.max(3,Math.round(8-5*amt))
+              :f==='posterize'?Math.max(2,Math.round(10-7*amt)):0;
   const noiseAmt=f==='deepfry'?28*amt:0;
   const step=levels?255/(levels-1):0;
-  for(let i=0;i<p.length;i+=4){
+  const solar=f==='solarize'?255*(1-amt*0.8):0;       // higher amount = more flipped
+  const w=cv.width, h=cv.height, cx=w/2, cy=h/2;
+  const maxD=Math.sqrt(cx*cx+cy*cy), vig=f==='vignette'?0.4+1.3*amt:0;
+  for(let i=0,px=0;i<p.length;i+=4,px++){
     let r=p[i],g=p[i+1],b=p[i+2];
     if(con!==1){ r=(r-128)*con+128; g=(g-128)*con+128; b=(b-128)*con+128; }
-    const gray=0.299*r+0.587*g+0.114*b;
-    r=gray+(r-gray)*sat; g=gray+(g-gray)*sat; b=gray+(b-gray)*sat;
+    if(sat!==1){ const gray=0.299*r+0.587*g+0.114*b;
+      r=gray+(r-gray)*sat; g=gray+(g-gray)*sat; b=gray+(b-gray)*sat; }
+    if(f==='sepia'){ const gray=0.299*r+0.587*g+0.114*b;
+      r=gray*1.07+18; g=gray*0.92+9; b=gray*0.70; }
+    if(f==='negate'){ r=255-r; g=255-g; b=255-b; }
+    if(solar){ if(r>solar)r=255-r; if(g>solar)g=255-g; if(b>solar)b=255-b; }
     if(warmth){ r+=warmth; b-=warmth*0.6; }
     if(step){ r=Math.round(r/step)*step; g=Math.round(g/step)*step; b=Math.round(b/step)*step; }
     if(noiseAmt){ const n=(Math.random()-0.5)*noiseAmt; r+=n; g+=n; b+=n; }
-    p[i]=r<0?0:r>255?255:r; p[i+1]=g<0?0:g>255?255:g; p[i+2]=b<0?0:b>255?255:b;
+    if(vig){ const dx=(px%w)-cx, dy=((px/w)|0)-cy;
+      const k=Math.max(0,1-vig*Math.pow(Math.sqrt(dx*dx+dy*dy)/maxD,2.2));
+      r*=k; g*=k; b*=k; }
+    p[i]=clamp255(r); p[i+1]=clamp255(g); p[i+2]=clamp255(b);
   }
   ctx.putImageData(img,0,0);
 }
 
+/* scratch canvas the pixel passes read from */
+const fxCv=document.createElement('canvas'), fxCtx=fxCv.getContext('2d',{willReadFrequently:true});
+function fxSource(){ if(fxCv.width!==cv.width||fxCv.height!==cv.height){ fxCv.width=cv.width; fxCv.height=cv.height; }
+  fxCtx.clearRect(0,0,fxCv.width,fxCv.height); fxCtx.drawImage(cv,0,0); return fxCv; }
+
+/* -blur: the browser's own gaussian, which is far quicker than doing it by hand */
+function blurPass(radius){ const src=fxSource();
+  ctx.save(); ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.filter='blur('+radius.toFixed(1)+'px)'; ctx.drawImage(src,0,0); ctx.restore(); }
+
+/* -charcoal / -emboss / -edge / -sharpen: 3x3 convolutions */
+function convPass(f,amt){
+  const w=cv.width,h=cv.height;
+  const src=ctx.getImageData(0,0,w,h), s=src.data;
+  const out=ctx.createImageData(w,h), o=out.data;
+  const k = f==='emboss' ? [-2,-1,0,-1,1,1,0,1,2]
+                         : [0,-1,0,-1,4,-1,0,-1,0];          // laplacian: edge, charcoal, sharpen
+  const gray=f==='charcoal'||f==='emboss';
+  const gain = f==='emboss'?1 : f==='sharpen'?0.4+2.2*amt : 1+2.5*amt;
+  const unsharp = f==='sharpen';                              // add the laplacian back onto the original
+  for(let y=0;y<h;y++){
+    for(let x=0;x<w;x++){
+      const i=(y*w+x)*4; let r=0,g=0,b=0;
+      for(let ky=-1;ky<=1;ky++){
+        const yy=y+ky<0?0:y+ky>=h?h-1:y+ky;
+        for(let kx=-1;kx<=1;kx++){
+          const xx=x+kx<0?0:x+kx>=w?w-1:x+kx;
+          const j=(yy*w+xx)*4, m=k[(ky+1)*3+(kx+1)];
+          if(!m)continue;
+          r+=s[j]*m; g+=s[j+1]*m; b+=s[j+2]*m;
+        }
+      }
+      r*=gain; g*=gain; b*=gain;
+      if(unsharp){ r+=s[i]; g+=s[i+1]; b+=s[i+2]; }
+      if(f==='emboss'){ r+=128; g+=128; b+=128; }
+      if(gray){ let v=0.299*r+0.587*g+0.114*b;
+        if(f==='charcoal') v=255-v;                    // charcoal is inverted edges on paper
+        r=g=b=v; }
+      o[i]=clamp255(r); o[i+1]=clamp255(g); o[i+2]=clamp255(b); o[i+3]=s[i+3];
+    }
+  }
+  ctx.putImageData(out,0,0);
+}
+
+/* -paint: each pixel takes the most common bucketed color in its neighbourhood.
+   Run at half resolution and scale back up: the look is blocky either way, and
+   full-res is seconds-per-frame on a phone. */
+function paintPass(radius){
+  const w=cv.width>>1, h=cv.height>>1, BINS=20;
+  if(fxCv.width!==w||fxCv.height!==h){ fxCv.width=w; fxCv.height=h; }
+  fxCtx.clearRect(0,0,w,h); fxCtx.drawImage(cv,0,0,w,h);
+  const src=fxCtx.getImageData(0,0,w,h), s=src.data;
+  const out=fxCtx.createImageData(w,h), o=out.data;
+  const count=new Int32Array(BINS), sr=new Int32Array(BINS), sg=new Int32Array(BINS), sb=new Int32Array(BINS);
+  for(let y=0;y<h;y++){
+    for(let x=0;x<w;x++){
+      count.fill(0); sr.fill(0); sg.fill(0); sb.fill(0);
+      for(let dy=-radius;dy<=radius;dy++){
+        const yy=y+dy; if(yy<0||yy>=h)continue;
+        for(let dx=-radius;dx<=radius;dx++){
+          const xx=x+dx; if(xx<0||xx>=w)continue;
+          const j=(yy*w+xx)*4;
+          const v=(0.299*s[j]+0.587*s[j+1]+0.114*s[j+2])*(BINS-1)/255|0;
+          count[v]++; sr[v]+=s[j]; sg[v]+=s[j+1]; sb[v]+=s[j+2];
+        }
+      }
+      let best=0; for(let v=1;v<BINS;v++) if(count[v]>count[best]) best=v;
+      const i=(y*w+x)*4, n=count[best]||1;
+      o[i]=sr[best]/n; o[i+1]=sg[best]/n; o[i+2]=sb[best]/n; o[i+3]=s[i+3];
+    }
+  }
+  fxCtx.putImageData(out,0,0);
+  ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.drawImage(fxCv,0,0,cv.width,cv.height);
+}
+
+/* -swirl / -implode: resample through a radial warp around the center */
+function warpPass(f,amt){
+  const w=cv.width,h=cv.height,cx=w/2,cy=h/2,R=Math.min(cx,cy);
+  const src=ctx.getImageData(0,0,w,h), s=src.data;
+  const out=ctx.createImageData(w,h), o=out.data;
+  const twist=amt*Math.PI*1.6, pull=amt*0.75;
+  for(let y=0;y<h;y++){
+    for(let x=0;x<w;x++){
+      const i=(y*w+x)*4, dx=x-cx, dy=y-cy, d=Math.sqrt(dx*dx+dy*dy);
+      let sx=x, sy=y;
+      if(d<R){
+        if(f==='swirl'){ const a=Math.atan2(dy,dx)+twist*(1-d/R);
+          sx=cx+d*Math.cos(a); sy=cy+d*Math.sin(a); }
+        else { const k=Math.pow(d/R,pull);              // implode pulls toward the center
+          sx=cx+dx*k; sy=cy+dy*k; }
+      }
+      const jx=sx<0?0:sx>=w?w-1:sx|0, jy=sy<0?0:sy>=h?h-1:sy|0, j=(jy*w+jx)*4;
+      o[i]=s[j]; o[i+1]=s[j+1]; o[i+2]=s[j+2]; o[i+3]=s[j+3];
+    }
+  }
+  ctx.putImageData(out,0,0);
+}
+
 /* ---------- layers ---------- */
 function addTextLayer(text,yFrac){ const L={id:uid++,type:'text',text,x:cv.width/2,y:cv.height*yFrac,rot:0,
-  font:'Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif',size:84,fill:'#FFFFFF',stroke:'#000000',caps:true};
+  font:'Impact,Anton,Haettenschweiler,"Arial Narrow Bold",sans-serif',size:84,fill:'#FFFFFF',stroke:'#000000',caps:true};
   layers.push(L); select(L.id); switchTab('text'); render(); }
 function addStickerLayer(emoji){ const L={id:uid++,type:'sticker',emoji,x:cv.width/2,y:cv.height/2,size:200,rot:0};
   layers.push(L); select(L.id); switchTab('stickers'); render(); }
@@ -653,10 +799,15 @@ document.getElementById('fileInput').onchange=e=>{ const f=e.target.files[0]; if
     img.src=r.result; }; r.readAsDataURL(f); };
 
 /* filters */
-document.getElementById('filterRow').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return;
-  document.querySelectorAll('#filterRow button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
-  state.filter=b.dataset.f;
-  document.getElementById('fryWrap').style.display=state.filter==='deepfry'?'block':'none'; render(); });
+const fr=document.getElementById('filterRow');
+Object.keys(FX).forEach(f=>{ const b=document.createElement('button');
+  b.dataset.f=f; b.textContent=FX[f].label; if(f==='none') b.classList.add('on'); fr.appendChild(b); });
+function syncFryWrap(){ const a=FX[state.filter].amount;
+  document.getElementById('fryWrap').style.display=a?'block':'none';
+  if(a) document.getElementById('fryLabel').textContent=a; }
+fr.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return;
+  fr.querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+  state.filter=b.dataset.f; syncFryWrap(); render(); });
 document.getElementById('fryRange').oninput=e=>{ state.fryAmt=+e.target.value;
   document.getElementById('fryVal').textContent=e.target.value+'%'; render(); };
 
@@ -839,4 +990,11 @@ if(location.hash==='#draw'){ removeMonkey(); switchTab('draw'); }
 
 renderLayers();
 render();
+
+/* the canvas draws with whatever fonts are ready at paint time, so redraw once
+   Anton has landed: on phones (no Impact) the first frame would otherwise be
+   the generic sans fallback */
+if(document.fonts && document.fonts.load){
+  document.fonts.load('84px Anton').then(()=>render()).catch(()=>{});
+}
 </script>
