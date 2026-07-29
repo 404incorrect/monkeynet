@@ -89,6 +89,13 @@
   .dateline{font-size:12.5px;color:var(--muted);font-weight:700;margin-bottom:12px}
   .dateline b{color:var(--ink)}
   .wire p{font-family:Georgia,ui-serif,serif;font-size:16px;line-height:1.62;color:#E7E2D4;margin:0 0 14px}
+  /* optional photo on a dispatch: sits under the dateline, credit line built in */
+  .shot{margin:0 0 14px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel2)}
+  .shot img{display:block;width:100%;height:auto}
+  .shot figcaption{padding:9px 12px;font-family:Georgia,ui-serif,serif;font-style:italic;
+    font-size:11.5px;line-height:1.55;color:var(--muted)}
+  .shot figcaption a{color:var(--jungle);font-weight:600;font-style:normal}
+  .shot figcaption a:hover{color:var(--banana)}
   .src{display:inline-block;font-family:ui-sans-serif,system-ui,sans-serif;font-size:13px;font-weight:800;
     color:var(--jungle)}
   .src:hover{color:var(--banana)}
@@ -115,6 +122,16 @@
   <div class="live"><span class="dot"></span>Live from the canopy</div>
 
   <hr class="rule">
+
+  <!-- A dispatch can carry a photo. Put the file in /news/ and drop this in
+       right under the dateline, credit line included:
+
+       <figure class="shot">
+         <img src="news/name.jpg" alt="what it shows, for a screen reader" loading="lazy">
+         <figcaption>One line on what it shows.
+           <a href="SOURCE_URL" target="_blank" rel="noopener">Who took it</a>.</figcaption>
+       </figure>
+  -->
 
   <!-- 1 · reported July 16, 2026 -->
   <article class="wire good">
