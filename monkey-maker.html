@@ -226,7 +226,7 @@
           <label><span id="fryLabel">Fry level</span> <span id="fryVal">70%</span></label>
           <input type="range" id="fryRange" min="20" max="100" value="70">
         </div>
-        <div class="hint">The heavier looks (oil paint, charcoal, swirl) redraw the whole
+        <div class="hint">The heavier looks (oil paint, emboss, swirl) redraw the whole
           1080px canvas, so they take a beat to land on a phone.</div>
       </div>
 
@@ -523,7 +523,7 @@ function drawSelection(L){ if(L._hw==null)return; ctx.save();
 
 /* ---------- filters ----------
    The darkroom: the classic ImageMagick effects (-sepia-tone, -negate, -solarize,
-   -posterize, -vignette, -charcoal, -emboss, -edge, -paint, -swirl, -implode,
+   -posterize, -vignette, -emboss, -paint, -swirl, -implode,
    -blur, -sharpen), rewritten as plain canvas passes so everything stays local.
    FX[f].amount is the label for the slider; a filter with no amount hides it. */
 const FX = {
@@ -536,9 +536,7 @@ const FX = {
   solarize: {label:'Solarize',  amount:'Threshold'},
   posterize:{label:'Posterize', amount:'Levels'},
   vignette: {label:'Vignette',  amount:'Falloff'},
-  charcoal: {label:'Charcoal',  amount:'Pressure'},
   emboss:   {label:'Emboss'},
-  edge:     {label:'Edge',      amount:'Strength'},
   paint:    {label:'Oil paint', amount:'Brush'},
   swirl:    {label:'Swirl',     amount:'Twist'},
   implode:  {label:'Implode',   amount:'Pull'},
@@ -553,7 +551,7 @@ function applyFilter(){
   if(f==='blur'){ return blurPass(1+11*amt); }
   if(f==='swirl'||f==='implode'){ return warpPass(f,amt); }
   if(f==='paint'){ return paintPass(Math.max(1,Math.round(1+4*amt))); }
-  if(f==='charcoal'||f==='emboss'||f==='edge'||f==='sharpen'){ return convPass(f,amt); }
+  if(f==='emboss'||f==='sharpen'){ return convPass(f,amt); }
 
   const img=ctx.getImageData(0,0,cv.width,cv.height), p=img.data;
   const sat=f==='bw'?0:f==='saturate'?1.7:f==='deepfry'?1+1.9*amt:1;
@@ -596,15 +594,15 @@ function blurPass(radius){ const src=fxSource();
   ctx.save(); ctx.clearRect(0,0,cv.width,cv.height);
   ctx.filter='blur('+radius.toFixed(1)+'px)'; ctx.drawImage(src,0,0); ctx.restore(); }
 
-/* -charcoal / -emboss / -edge / -sharpen: 3x3 convolutions */
+/* -emboss / -sharpen: 3x3 convolutions */
 function convPass(f,amt){
   const w=cv.width,h=cv.height;
   const src=ctx.getImageData(0,0,w,h), s=src.data;
   const out=ctx.createImageData(w,h), o=out.data;
   const k = f==='emboss' ? [-2,-1,0,-1,1,1,0,1,2]
-                         : [0,-1,0,-1,4,-1,0,-1,0];          // laplacian: edge, charcoal, sharpen
-  const gray=f==='charcoal'||f==='emboss';
-  const gain = f==='emboss'?1 : f==='sharpen'?0.4+2.2*amt : 1+2.5*amt;
+                         : [0,-1,0,-1,4,-1,0,-1,0];          // laplacian: sharpen
+  const gray=f==='emboss';
+  const gain = f==='emboss'?1 : 0.4+2.2*amt;
   const unsharp = f==='sharpen';                              // add the laplacian back onto the original
   for(let y=0;y<h;y++){
     for(let x=0;x<w;x++){
@@ -621,9 +619,7 @@ function convPass(f,amt){
       r*=gain; g*=gain; b*=gain;
       if(unsharp){ r+=s[i]; g+=s[i+1]; b+=s[i+2]; }
       if(f==='emboss'){ r+=128; g+=128; b+=128; }
-      if(gray){ let v=0.299*r+0.587*g+0.114*b;
-        if(f==='charcoal') v=255-v;                    // charcoal is inverted edges on paper
-        r=g=b=v; }
+      if(gray){ r=g=b=0.299*r+0.587*g+0.114*b; }
       o[i]=clamp255(r); o[i+1]=clamp255(g); o[i+2]=clamp255(b); o[i+3]=s[i+3];
     }
   }
