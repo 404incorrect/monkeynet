@@ -52,6 +52,15 @@
     filter:drop-shadow(0 3px 6px rgba(0,0,0,.55))}
   .logo span{color:var(--jungle);-webkit-text-fill-color:var(--jungle)}
   .tag{color:var(--muted);font-size:13px;text-shadow:0 1px 4px rgba(0,0,0,.6)}
+  .replybanner{display:none;align-items:center;gap:10px;background:var(--panel2);
+    border:1px solid var(--line);border-radius:12px;padding:9px 12px;margin-bottom:14px;font-size:13px}
+  .replybanner.show{display:flex}
+  .replybanner img{width:32px;height:32px;object-fit:cover;border-radius:7px;flex:none;background:#000}
+  .replybanner .rtxt{color:var(--muted)}
+  .replybanner .rtxt b{color:var(--banana)}
+  .replybanner .x{margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;
+    font-size:16px;line-height:1;padding:2px 6px;font-family:inherit}
+  .replybanner .x:hover{color:var(--cream)}
   .grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px}
   .grid>*{min-width:0}
   @media(max-width:880px){
@@ -183,6 +192,12 @@
     <div class="logo">Monkey<span>Maker</span></div>
     <div class="tag">by MonkeyNet</div>
   </header>
+
+  <div class="replybanner" id="replybanner">
+    <img id="replybannerImg" alt="">
+    <span class="rtxt">Replying to <b id="replybannerWho"></b></span>
+    <button type="button" class="x" id="replybannerX" title="Cancel reply">✕</button>
+  </div>
 
   <div class="grid">
     <div>
@@ -962,14 +977,34 @@ function exportBlob(){ const keep=selected; selected=null; render();
 document.getElementById('downloadBtn').onclick=()=>{ const {url,ext}=exportData();
   const a=document.createElement('a'); a.href=url; a.download='monkey-meme.'+ext; a.click();
   toast('Saved monkey-meme.'+ext); };
+/* ---- reply: a monkey to reply to, sent over from the Gallery ---- */
+let pendingReplyTo=null;
+(function pickupReplyTo(){
+  let raw; try{ raw=sessionStorage.getItem('mk:replyTo'); }catch(e){ return; }
+  if(!raw) return;
+  let data; try{ data=JSON.parse(raw); }catch(e){ return; }
+  if(!data || !data.id) return;
+  pendingReplyTo=data;
+  const banner=document.getElementById('replybanner');
+  document.getElementById('replybannerImg').src=data.src||'';
+  document.getElementById('replybannerWho').textContent=data.handle?('🐵 '+data.handle):'🐵 some monkey';
+  banner.classList.add('show');
+})();
+document.getElementById('replybannerX').onclick=()=>{
+  pendingReplyTo=null; try{ sessionStorage.removeItem('mk:replyTo'); }catch(e){}
+  document.getElementById('replybanner').classList.remove('show'); };
+
 document.getElementById('toGalleryBtn').onclick=()=>{
-  // render a compact JPEG and hand it (plus caption) to the Gallery composer
+  // render a compact JPEG and hand it (plus caption, plus any reply context) to the Gallery composer
   const keep=selected; selected=null; render();
   const img=cv.toDataURL('image/jpeg',0.9);
   selected=keep; render();
   const caption=document.getElementById('caption').value.trim();
-  try{ sessionStorage.setItem('mk:handoff', JSON.stringify({img, caption})); }
+  const payload={img, caption};
+  if(pendingReplyTo){ payload.replyTo=pendingReplyTo.id; payload.replyToSrc=pendingReplyTo.src; payload.replyToHandle=pendingReplyTo.handle; }
+  try{ sessionStorage.setItem('mk:handoff', JSON.stringify(payload)); }
   catch(e){ toast('Monkey too big to send — try Download instead'); return; }
+  try{ sessionStorage.removeItem('mk:replyTo'); }catch(e){}
   location.href='monkey-gallery.html'; };
 document.getElementById('copyCap').onclick=async()=>{
   try{ await navigator.clipboard.writeText(document.getElementById('caption').value); toast('Caption copied'); }

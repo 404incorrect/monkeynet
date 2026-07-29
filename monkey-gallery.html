@@ -142,6 +142,41 @@
     display:flex;align-items:center;gap:8px}
   .lbwho .anon{color:var(--muted);font-weight:600}
   .lbwho .t{margin-left:auto;color:var(--muted);font-weight:600;flex:none}
+
+  /* ---- reply chip (composer) ---- */
+  .replychip{display:none;align-items:center;gap:9px;background:var(--panel2);
+    border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:12px;font-size:13px}
+  .replychip.show{display:flex}
+  .replychip img{width:30px;height:30px;object-fit:cover;border-radius:6px;flex:none;background:#000}
+  .replychip .rtxt{color:var(--muted)}
+  .replychip .rtxt b{color:var(--banana)}
+  .replychip .x{margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;
+    font-size:16px;line-height:1;padding:2px 6px;font-family:inherit}
+  .replychip .x:hover{color:var(--ink)}
+
+  /* ---- reply action (post cards, tiles, lightbox) ---- */
+  .replybtn{background:none;border:none;color:var(--muted);font-weight:800;font-size:12px;
+    cursor:pointer;font-family:inherit;padding:0}
+  .replybtn:hover{color:var(--banana)}
+
+  /* ---- threads (wall view) ---- */
+  .thread-toggle{display:flex;align-items:center;gap:6px;width:100%;background:none;border:none;
+    color:var(--jungle);font-weight:800;font-size:12.5px;cursor:pointer;font-family:inherit;
+    padding:10px 14px;margin-top:-6px}
+  .thread-toggle:hover{color:var(--banana)}
+  .thread{margin:0 16px 16px 26px;padding-left:14px;border-left:2px solid var(--line)}
+  .thread .post{margin-bottom:10px}
+  .thread .post img.shot{max-height:240px;object-fit:cover}
+
+  /* ---- reply badge (grid/scatter) ---- */
+  .replytag{color:var(--muted);margin-right:2px}
+  .mk{overflow:visible}
+  .mk .rtag{position:absolute;top:-7px;left:-7px;background:var(--bg);border:2px solid var(--jungle);
+    color:var(--jungle);font-size:10px;font-weight:800;width:19px;height:19px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:1}
+  .lbreply{font-size:12.5px;color:var(--muted);margin-top:6px;cursor:pointer}
+  .lbreply:hover{color:var(--banana)}
+  .lbreply b{color:var(--banana);font-weight:800}
 </style>
 
 <div class="topbar">
@@ -155,6 +190,11 @@
   <div class="banner" id="banner" style="display:none"></div>
 
   <div class="composer">
+    <div class="replychip" id="replychip">
+      <img id="replychipImg" alt="">
+      <span class="rtxt">Replying to <b id="replychipWho"></b></span>
+      <button type="button" class="x" id="replychipX" title="Cancel reply">✕</button>
+    </div>
     <div class="drop" id="drop">
       <span id="dropText">Tap to add a monkey 🐵 &nbsp;·&nbsp; or make one first</span>
       <input type="file" id="file" accept="image/*" hidden>
@@ -207,18 +247,18 @@ const Store = {
       const r=await fetch(`${SUPABASE_URL}/rest/v1/posts?select=*&hidden=eq.false&order=created_at.desc&limit=200`,
         {headers:{apikey:SUPABASE_ANON, Authorization:'Bearer '+SUPABASE_ANON}});
       if(!r.ok) throw new Error('list failed'); const rows=await r.json();
-      return rows.map(p=>({id:p.id, handle:p.handle||'', caption:p.caption||'', src:p.image_url, ts:new Date(p.created_at).getTime()}));
+      return rows.map(p=>({id:p.id, handle:p.handle||'', caption:p.caption||'', src:p.image_url, ts:new Date(p.created_at).getTime(), replyTo:p.reply_to||null}));
     }
     if(HAS_LOCAL){ const out=[];
       try{ const res=await window.storage.list('gallery:item:', true);
         if(res&&res.keys) for(const k of res.keys){ try{ const g=await window.storage.get(k,true);
           if(g){ const it=JSON.parse(g.value); if(it.hidden) continue;
-            out.push({id:k, handle:it.handle||'', caption:it.caption, src:it.img, ts:it.ts}); } }catch(e){} } }catch(e){}
+            out.push({id:k, handle:it.handle||'', caption:it.caption, src:it.img, ts:it.ts, replyTo:it.replyTo||null}); } }catch(e){} } }catch(e){}
       return out.sort((a,b)=>b.ts-a.ts);
     }
     return [];
   },
-  async add(handle, caption, canvas){
+  async add(handle, caption, canvas, replyTo){
     if(useSupa){
       const blob=await new Promise(res=>canvas.toBlob(res,'image/jpeg',0.82));
       const path=Date.now()+'-'+Math.random().toString(36).slice(2)+'.jpg';
@@ -230,14 +270,14 @@ const Store = {
       const ins=await fetch(`${SUPABASE_URL}/rest/v1/posts`,
         {method:'POST', headers:{apikey:SUPABASE_ANON, Authorization:'Bearer '+SUPABASE_ANON,
           'Content-Type':'application/json', Prefer:'return=minimal'},
-          body:JSON.stringify({handle, caption, image_url})});
+          body:JSON.stringify({handle, caption, image_url, reply_to:replyTo||null})});
       if(!ins.ok) throw new Error('insert failed');
       return;
     }
     if(HAS_LOCAL){
       const img=canvas.toDataURL('image/jpeg',0.72);
       const id='w'+Date.now()+Math.floor(Math.random()*1000);
-      await window.storage.set('gallery:item:'+id, JSON.stringify({handle,caption,img,ts:Date.now()}), true);
+      await window.storage.set('gallery:item:'+id, JSON.stringify({handle,caption,img,ts:Date.now(),replyTo:replyTo||null}), true);
       return;
     }
     throw new Error('no backend');
@@ -253,9 +293,28 @@ if(!useSupa){
 
 /* ---- compose ---- */
 let pickedCanvas=null;
+let pendingReplyTo=null;
 const drop=document.getElementById('drop'), fileEl=document.getElementById('file'),
       postBtn=document.getElementById('post'), capEl=document.getElementById('cap'),
-      handleEl=document.getElementById('handle'), statusEl=document.getElementById('status');
+      handleEl=document.getElementById('handle'), statusEl=document.getElementById('status'),
+      replychip=document.getElementById('replychip'), replychipImg=document.getElementById('replychipImg'),
+      replychipWho=document.getElementById('replychipWho'), replychipX=document.getElementById('replychipX');
+
+function showReplyChip(id, src, handle){
+  pendingReplyTo=id; replychipImg.src=src||'';
+  replychipWho.textContent=handle?('🐵 '+handle):'🐵 some monkey';
+  replychip.classList.add('show');
+}
+function clearReplyChip(){ pendingReplyTo=null; replychip.classList.remove('show'); }
+replychipX.onclick=clearReplyChip;
+
+/* ---- reply: send a post's monkey to MonkeyMaker as reply context ---- */
+function startReply(p){
+  const rootId=p.replyTo||p.id;
+  try{ sessionStorage.setItem('mk:replyTo', JSON.stringify({id:rootId, src:p.src, handle:p.handle||''})); }
+  catch(e){}
+  location.href='monkey-maker.html';
+}
 
 /* load an image source into the composer as the picked monkey */
 function loadIntoComposer(src, caption){
@@ -285,15 +344,16 @@ function pickupFromMaker(){
   if(!data || !data.img) return;
   loadIntoComposer(data.img, (data.caption||'').trim());
   if(data.handle && !handleEl.value) handleEl.value=String(data.handle).slice(0,24);
+  if(data.replyTo) showReplyChip(data.replyTo, data.replyToSrc, data.replyToHandle);
   toast('Monkey loaded 🐵');
 }
 
 postBtn.onclick=async()=>{
   if(!pickedCanvas) return;
   postBtn.disabled=true; statusEl.textContent='Hanging…';
-  try{ await Store.add(handleEl.value.trim().slice(0,24), capEl.value.trim(), pickedCanvas);
-    statusEl.textContent=''; toast('Up in the gallery 🐵');
-    pickedCanvas=null; capEl.value=''; handleEl.value='';
+  try{ await Store.add(handleEl.value.trim().slice(0,24), capEl.value.trim(), pickedCanvas, pendingReplyTo);
+    statusEl.textContent=''; toast(pendingReplyTo?'Reply hung up 🐵':'Up in the gallery 🐵');
+    pickedCanvas=null; capEl.value=''; handleEl.value=''; clearReplyChip();
     drop.classList.remove('has'); drop.innerHTML='<span id="dropText">Tap to add a monkey 🐵</span>'; drop.appendChild(fileEl);
     loadFeed();
   }catch(e){ statusEl.textContent=''; postBtn.disabled=false; toast('Could not hang it — check your Supabase setup'); }
@@ -307,6 +367,20 @@ const feedEl=document.getElementById('feed'),
       lbCap=document.getElementById('lbcap'), lbWho=document.getElementById('lbwho');
 
 let POSTS=[];
+let byId={}, childrenOf={};
+/* two-level threading: a reply's replyTo always points at its root, so
+   grouping is a single pass, no tree walking. */
+function buildThreads(){
+  byId={}; childrenOf={};
+  POSTS.forEach(p=>{ byId[p.id]=p; });
+  POSTS.forEach(p=>{
+    if(!p.replyTo) return;
+    const root=byId[p.replyTo];
+    if(!root){ p.replyTo=null; return; } /* parent hidden/gone: surface as its own root */
+    (childrenOf[p.replyTo]=childrenOf[p.replyTo]||[]).push(p);
+  });
+  Object.values(childrenOf).forEach(list=>list.sort((a,b)=>a.ts-b.ts));
+}
 let mode='wall';
 try{ const m=localStorage.getItem('gallery:view'); if(['wall','grid','scatter'].includes(m)) mode=m; }catch(e){}
 
@@ -328,6 +402,9 @@ function fullDate(ts){ try{ return new Date(ts).toLocaleString(); }catch(e){ ret
 function whoHTML(p,timeCls){
   return (p.handle?('🐵 '+esc(p.handle)):'<span class="anon">🐵 some monkey</span>')
     + '<span class="'+timeCls+'" title="'+esc(fullDate(p.ts))+'">'+esc(timeAgo(p.ts))+'</span>'; }
+function replyBtn(p){
+  const b=document.createElement('button'); b.type='button'; b.className='replybtn'; b.textContent='Reply 🐵';
+  b.addEventListener('click', ()=>startReply(p)); return b; }
 
 /* deterministic layout helpers so the scatter looks intentional, not random each load */
 function hashStr(s){ s=String(s); let h=0; for(let i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))>>>0; } return h; }
@@ -336,7 +413,19 @@ function seeded(n){ const x=Math.sin(n)*10000; return x-Math.floor(x); }
 /* ---- lightbox (used by grid + scatter) ---- */
 function openLB(p){ lbImg.src=p.src;
   lbCap.textContent=p.caption||''; lbCap.style.display=p.caption?'block':'none';
-  lbWho.innerHTML=whoHTML(p,'t'); lb.classList.add('show'); }
+  lbWho.innerHTML=whoHTML(p,'t');
+  const old=document.getElementById('lbextra'); if(old) old.remove();
+  const extra=document.createElement('div'); extra.id='lbextra';
+  if(p.replyTo && byId[p.replyTo]){
+    const parent=byId[p.replyTo];
+    const rl=document.createElement('div'); rl.className='lbreply';
+    rl.innerHTML='↳ replying to <b>'+(parent.handle?esc(parent.handle):'some monkey')+'</b>';
+    rl.addEventListener('click', ()=>openLB(parent));
+    extra.appendChild(rl);
+  }
+  extra.appendChild(replyBtn(p));
+  lbWho.parentElement.appendChild(extra);
+  lb.classList.add('show'); }
 function closeLB(){ lb.classList.remove('show'); }
 lb.addEventListener('click', e=>{ if(e.target===lb) closeLB(); });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeLB(); });
@@ -350,6 +439,7 @@ function setMode(m){ if(m===mode) return; mode=m; try{ localStorage.setItem('gal
 viewsEl.addEventListener('click', e=>{ const b=e.target.closest('button'); if(b) setMode(b.dataset.mode); });
 
 function render(){
+  buildThreads();
   feedEl.className=''; feedEl.innerHTML='';
   if(!POSTS.length){ feedEl.innerHTML='<div class="empty">Empty gallery. Hang the first monkey 🍌</div>'; return; }
   if(mode==='grid'){ renderGrid(); return; }
@@ -357,15 +447,33 @@ function render(){
   renderWall();
 }
 
+/* one .post card, reused for roots and for nested replies in the thread */
+function postCard(p, reply){
+  const d=document.createElement('div'); d.className='post'+(reply?' reply':'');
+  const im=document.createElement('img'); im.className='shot'; im.src=p.src; im.loading='lazy'; im.alt='a monkey';
+  d.appendChild(im);
+  const m=document.createElement('div'); m.className='meta';
+  if(p.caption){ const c=document.createElement('div'); c.className='cap'; c.textContent=p.caption; m.appendChild(c); }
+  const who=document.createElement('div'); who.className='who'; who.innerHTML=whoHTML(p,'when');
+  who.appendChild(replyBtn(p));
+  m.appendChild(who); d.appendChild(m);
+  return d;
+}
+
 function renderWall(){
   POSTS.forEach(p=>{
-    const d=document.createElement('div'); d.className='post';
-    const im=document.createElement('img'); im.className='shot'; im.src=p.src; im.loading='lazy'; im.alt='a monkey';
-    d.appendChild(im);
-    const m=document.createElement('div'); m.className='meta';
-    if(p.caption){ const c=document.createElement('div'); c.className='cap'; c.textContent=p.caption; m.appendChild(c); }
-    const who=document.createElement('div'); who.className='who'; who.innerHTML=whoHTML(p,'when');
-    m.appendChild(who); d.appendChild(m); feedEl.appendChild(d);
+    if(p.replyTo) return; /* rendered nested under its root below */
+    feedEl.appendChild(postCard(p, false));
+    const kids=childrenOf[p.id];
+    if(!kids || !kids.length) return;
+    let open=false;
+    const toggle=document.createElement('button'); toggle.type='button'; toggle.className='thread-toggle';
+    toggle.textContent='🐵 '+kids.length+' repl'+(kids.length===1?'y':'ies');
+    const thread=document.createElement('div'); thread.className='thread'; thread.style.display='none';
+    kids.forEach(k=>thread.appendChild(postCard(k, true)));
+    toggle.addEventListener('click', ()=>{ open=!open; thread.style.display=open?'block':'none';
+      toggle.textContent=(open?'🐵 hide ':'🐵 ')+kids.length+' repl'+(kids.length===1?'y':'ies'); });
+    feedEl.appendChild(toggle); feedEl.appendChild(thread);
   });
 }
 
@@ -377,7 +485,8 @@ function renderGrid(){
     t.appendChild(im);
     const meta=document.createElement('div'); meta.className='tmeta';
     if(p.caption){ const c=document.createElement('div'); c.className='tcap'; c.textContent=p.caption; meta.appendChild(c); }
-    const who=document.createElement('div'); who.className='twho'; who.innerHTML=whoHTML(p,'ttime');
+    const who=document.createElement('div'); who.className='twho';
+    who.innerHTML=(p.replyTo?'<span class="replytag">↳</span>':'')+whoHTML(p,'ttime');
     meta.appendChild(who); t.appendChild(meta);
     t.addEventListener('click', ()=>openLB(p));
     feedEl.appendChild(t);
@@ -394,6 +503,7 @@ function renderScatter(){
     const el=document.createElement('div'); el.className='mk';
     const im=document.createElement('img'); im.src=p.src; im.alt='a monkey'; im.draggable=false; im.loading='lazy';
     el.appendChild(im);
+    if(p.replyTo){ const rtag=document.createElement('span'); rtag.className='rtag'; rtag.textContent='↳'; el.appendChild(rtag); }
     const tilt=(seeded(hashStr(key)+7)*16-8).toFixed(2);
     el.style.transform='rotate('+tilt+'deg)';
     board.appendChild(el);
