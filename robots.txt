@@ -9,4 +9,4 @@ Sitemap: https://monkeynet.org/sitemap.xml
 #   https://monkeynet.org/feeds/news.xml
 #   https://monkeynet.org/feeds/news.json
 #
-# The monkey responsible: https://monkeynet.org/humans.txt
+# How it is built: https://monkeynet.org/humans.txt
