@@ -70,7 +70,7 @@
     .sw{width:34px;height:34px}
     .zoombar button{height:44px}
     .zoombar #zoomFit{font-size:14px}
-    .tab{padding:14px 4px;font-size:14px}
+    .tab{padding:14px 2px;font-size:12px}
     .stk{font-size:30px}
     body.qb-open{padding-bottom:74px}
     body.qb-open .toast{bottom:84px}
@@ -91,7 +91,7 @@
     border:1px solid var(--line);border-radius:16px;overflow:hidden;
     box-shadow:0 16px 50px rgba(0,0,0,.4)}
   .tabs{display:flex;background:rgba(20,18,12,.7);border-bottom:1px solid var(--line)}
-  .tab{flex:1;padding:12px 4px;text-align:center;font-size:13px;font-weight:700;
+  .tab{flex:1 1 0;min-width:0;padding:12px 3px;text-align:center;font-size:13px;font-weight:700;
     color:var(--muted);cursor:pointer;border:none;background:none;letter-spacing:.02em}
   .tab.on{color:#0B0E0C;background:var(--banana)}
   .body{padding:14px;display:none}
@@ -119,6 +119,9 @@
   .swatches{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
   .sw{width:26px;height:26px;border-radius:50%;border:2px solid #00000040;cursor:pointer;padding:0}
   .sw.on{outline:2px solid var(--banana);outline-offset:2px}
+  /* "no outline" swatch: an empty circle with a slash through it */
+  .sw.none{background:linear-gradient(135deg,transparent 44%,var(--danger) 44%,var(--danger) 56%,transparent 56%),
+    rgba(255,255,255,.10)}
   .sw.pick{position:relative;overflow:hidden;
     background:conic-gradient(from 0deg,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)}
   .sw.pick input{position:absolute;inset:-6px;opacity:0;cursor:pointer;width:200%;height:200%}
@@ -127,6 +130,7 @@
   .toggle button{flex:1;min-width:64px;padding:8px;border:1px solid var(--line);background:var(--panel2);
     color:var(--cream);border-radius:8px;cursor:pointer;font-size:13px}
   .toggle button.on{background:var(--banana);color:#0B0E0C;border-color:var(--banana);font-weight:700}
+  #tplRow button{flex:1 1 calc(50% - 3px);min-width:0;padding:10px 6px}   /* 2x2 so "Demotivator" fits */
 
   .btn{display:block;width:100%;padding:11px;border:none;border-radius:10px;font-weight:700;
     font-size:14px;cursor:pointer;margin-top:8px}
@@ -220,6 +224,7 @@
     <div class="panel">
       <div class="tabs">
         <button class="tab on" data-t="monkeys">Image</button>
+        <button class="tab" data-t="frames">Frame</button>
         <button class="tab" data-t="draw">Draw</button>
         <button class="tab" data-t="text">Text</button>
         <button class="tab" data-t="stickers">Stickers</button>
@@ -243,6 +248,21 @@
         </div>
         <div class="hint">The heavier looks (oil paint, emboss, swirl) redraw the whole
           1080px canvas, so they take a beat to land on a phone.</div>
+      </div>
+
+      <!-- FRAME (poster templates: the monkey sits in a window, the words sit under it) -->
+      <div class="body" data-b="frames">
+        <h3>Pick a frame</h3>
+        <div class="toggle" id="tplRow"></div>
+        <div id="tplControls" style="display:none">
+          <button class="btn gold sm" id="rollTpl" style="margin-top:12px">&#127922; Fill in random words</button>
+          <div class="hint" id="tplHint"></div>
+          <div class="hint">The two lines start as "add text here": tap one on the canvas and retype it in the
+            Text tab. The frame is a layer too, so you can slide it up the stack under Layers, or bin it there.</div>
+        </div>
+        <div class="hint" id="tplNoneHint">A frame drops the monkey into a window and writes under it,
+          demotivational-poster style. It adds a frame layer plus two blank caption lines, all of them
+          ordinary layers you can edit, reorder or delete.</div>
       </div>
 
       <!-- DRAW -->
@@ -369,7 +389,7 @@
 const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
 let layers = [], selected = null, uid = 1, isDragging = false, zoom = 1;
-const state = {filter:'none', fryAmt:70};
+const state = {filter:'none', fryAmt:70, tpl:'none'};
 const D2R = Math.PI/180;
 
 /* ---------- freehand draw layer (folds MonkeyDraw into the studio) ---------- */
@@ -443,7 +463,7 @@ function paintMove(e){ if(!painting)return; const p=canvasPos(e); paintStroke(la
 function paintUp(){ if(painting){ painting=false; lastPt=null; render(); } }
 
 const FILLS   = ['#FFFFFF','#000000','#F5C518','#E5563C','#3FA34D','#4A90E2','#E24AB7'];
-const STROKES = ['#000000','#FFFFFF','#3FA34D','#E5563C','#5A3A1A'];
+const STROKES = ['none','#000000','#FFFFFF','#3FA34D','#E5563C','#5A3A1A'];
 const STICKERS = [
   /* primates */
   '\u{1F435}','\u{1F412}','\u{1F98D}','\u{1F9A7}','\u{1F648}','\u{1F649}','\u{1F64A}',
@@ -483,6 +503,80 @@ function rollCaption(){ const t=document.getElementById('caption');
 
 const RATIOS = [[1080,1080],[1080,1080],[1080,1080],[1080,1080],[1080,1080],[1080,1080],[1080,1080],[1080,1080],[1080,1920],[1080,1080],[1080,1080],[1080,1080],[1080,1350],[1080,1080],[1080,1350],[1080,1350]];
 
+/* ---------- frames ----------
+   A frame is a poster layout: the monkey is cropped into a window instead of
+   filling the canvas, the paper around it becomes the mount, and the caption
+   lines are dropped in as ordinary text layers (flagged tpl:true) so they stay
+   editable, draggable and deletable like anything else on the stack. */
+const SERIF = '"Times New Roman",Times,serif';
+const COMIC = '"Comic Sans MS","Comic Sans",cursive';
+const TPL = {
+  none:{ label:'None' },
+
+  demotivator:{
+    label:'Demotivator', paper:'#000000', ratio:[1080,1350],
+    hint:'Black card, hairline rule, Times underneath. One word on top, one straight-faced line below it.',
+    rect(W,H){ const w=W*0.76, h=Math.min(w,H*0.62); return {x:(W-w)/2, y:H*0.075, w, h}; },
+    front(c,W,H,r){ const g=W*0.014; c.save(); c.strokeStyle='#FFFFFF'; c.lineWidth=Math.max(2,W*0.0035);
+      c.strokeRect(r.x-g, r.y-g, r.w+g*2, r.h+g*2); c.restore(); },
+    texts(W,H,r){ const base=r.y+r.h, band=H-base; return [
+      {font:SERIF, size:Math.round(W*0.115), fill:'#FFFFFF', stroke:'none', caps:true,  y:base+band*0.31, wrap:r.w},
+      {font:SERIF, size:Math.round(W*0.048), fill:'#FFFFFF', stroke:'none', caps:false, y:base+band*0.68, wrap:r.w}
+    ]; },
+    lines:[
+      ['BANANA','he has no thoughts, only banana'],
+      ['NICE HAT','this monkey has a cool hat on'],
+      ['PERSISTENCE','the branch was always going to hold'],
+      ['TEAMWORK','one monkey climbs, every monkey climbs'],
+      ['AMBITION','he is going to the top of the tree and nobody asked him to'],
+      ['PATIENCE','the fruit ripens whether you watch it or not'],
+      ['LEADERSHIP','everyone followed him and he did not have a plan'],
+      ['THE CANOPY','it holds because all of you are holding it']
+    ]
+  },
+
+  polaroid:{
+    label:'Polaroid', paper:'#F5F2E9', ratio:[1080,1350],
+    hint:'White stock, fat bottom lip, handwriting in the margin. Good for a monkey you want to look remembered.',
+    rect(W,H){ const m=W*0.075, w=W-m*2, h=Math.min(w*1.05, H-m-H*0.20); return {x:m, y:m, w, h}; },
+    front(c,W,H,r){ c.save(); c.strokeStyle='rgba(0,0,0,.18)'; c.lineWidth=2;
+      c.strokeRect(r.x+1, r.y+1, r.w-2, r.h-2); c.restore(); },
+    texts(W,H,r){ const base=r.y+r.h, band=H-base; return [
+      {font:COMIC, size:Math.round(W*0.055), fill:'#12160F', stroke:'none', caps:false, y:base+band*0.42, wrap:r.w},
+      {font:COMIC, size:Math.round(W*0.032), fill:'#6B6257', stroke:'none', caps:false, y:base+band*0.78, wrap:r.w}
+    ]; },
+    lines:[
+      ['the day he found the good tree','summer, somewhere in the canopy'],
+      ['first climb','nobody got hurt'],
+      ['he insisted on this photo','taken against my advice'],
+      ['banana day','an annual tradition now'],
+      ['us, before the wire','back when it was quiet up there']
+    ]
+  },
+
+  placard:{
+    label:'Gallery', paper:'#E7E1D3', ratio:[1080,1350],
+    hint:'Museum wall: dark frame, gold line, a title card that takes itself completely seriously.',
+    rect(W,H){ const w=W*0.66, h=Math.min(w*1.2, H*0.62); return {x:(W-w)/2, y:H*0.10, w, h}; },
+    front(c,W,H,r){ c.save();
+      const lw=W*0.03; c.lineWidth=lw; c.strokeStyle='#2A2119';
+      c.strokeRect(r.x-lw/2, r.y-lw/2, r.w+lw, r.h+lw);
+      c.lineWidth=2; c.strokeStyle='rgba(201,162,39,.75)';
+      c.strokeRect(r.x-lw-1, r.y-lw-1, r.w+lw*2+2, r.h+lw*2+2); c.restore(); },
+    texts(W,H,r){ const base=r.y+r.h, band=H-base; return [
+      {font:SERIF, size:Math.round(W*0.052), fill:'#1E1A15', stroke:'none', caps:false, y:base+band*0.34, wrap:r.w},
+      {font:SERIF, size:Math.round(W*0.030), fill:'#5B5245', stroke:'none', caps:false, y:base+band*0.62, wrap:r.w}
+    ]; },
+    lines:[
+      ['Untitled (Monkey), 2026','MonkeyNet Collection · oil on banana'],
+      ['Study of a Monkey, Thinking','on loan from the canopy'],
+      ['Portrait of an Ape, Unbothered','MonkeyNet Collection · do not touch'],
+      ['The Climber','artist unknown · medium unclear'],
+      ['Self-Portrait with Banana','from the permanent collection']
+    ]
+  }
+};
+
 function setMonkeyImg(img, uploaded){
   if(monkeyLayer){ monkeyLayer.img=img; monkeyLayer.uploaded=!!uploaded; }
   else { monkeyLayer={id:uid++, type:'monkey', img, uploaded:!!uploaded}; layers.splice(1,0,monkeyLayer); } // just above bg
@@ -495,12 +589,19 @@ function removeMonkey(){ bgToken++;   // cancel any in-flight monkey load
   render(); renderLayers(); }
 
 /* ---------- rendering ---------- */
+function tplWindow(){ const T=TPL[state.tpl]; return T&&T.rect ? T.rect(cv.width,cv.height) : null; }
+function drawCover(im,r){ const s=Math.max(r.w/im.width, r.h/im.height), w=im.width*s, h=im.height*s;
+  ctx.save(); ctx.beginPath(); ctx.rect(r.x,r.y,r.w,r.h); ctx.clip();
+  ctx.drawImage(im, r.x+(r.w-w)/2, r.y+(r.h-h)/2, w, h); ctx.restore(); }
 function drawBase(){
   ctx.clearRect(0,0,cv.width,cv.height);
+  const win=tplWindow();
   for(const L of layers){
     if(L.type==='bg'){ ctx.fillStyle=L.color||'#000'; ctx.fillRect(0,0,cv.width,cv.height); }
-    else if(L.type==='monkey'){ const im=L.img; if(im){ const s=Math.max(cv.width/im.width, cv.height/im.height);
-      const w=im.width*s, h=im.height*s; ctx.drawImage(im,(cv.width-w)/2,(cv.height-h)/2,w,h); } }
+    else if(L.type==='monkey'){ const im=L.img;
+      if(im) drawCover(im, win || {x:0,y:0,w:cv.width,h:cv.height}); }
+    else if(L.type==='frame'){ const T=TPL[L.frame];   // move it up the stack to rule over the stickers too
+      if(win && T && T.front) T.front(ctx,cv.width,cv.height,win); }
     else if(L.type==='draw'){ ctx.drawImage(drawCv,0,0); }
     else if(L.type==='text'){ drawText(L); }
     else { drawSticker(L); }
@@ -511,16 +612,31 @@ function render(){
   if(!isDragging && !painting) applyFilter();       // skip the pixel filter mid-stroke for smoothness
   const sel=getSel(); if(sel) drawSelection(sel);
 }
+/* wrap to a pixel width; only frame captions ask for this, meme text keeps its manual line breaks */
+function wrapLines(src,maxW){
+  const out=[];
+  for(const line of src){
+    const words=line.split(' '); let cur='';
+    for(const w of words){
+      const t=cur?cur+' '+w:w;
+      if(cur && ctx.measureText(t).width>maxW){ out.push(cur); cur=w; } else cur=t;
+    }
+    out.push(cur);
+  }
+  return out;
+}
 function drawText(L){
-  const lines=(L.caps?L.text.toUpperCase():L.text).split('\n');
+  let lines=(L.caps?L.text.toUpperCase():L.text).split('\n');
   ctx.save(); ctx.translate(L.x,L.y); ctx.rotate(L.rot||0);
   ctx.font=L.size+'px '+L.font; ctx.textAlign='center'; ctx.textBaseline='middle';
+  if(L.wrap) lines=wrapLines(lines,L.wrap);
   ctx.lineJoin='round'; ctx.miterLimit=2;
   const lh=L.size*1.08; let maxW=0;
   lines.forEach(t=>maxW=Math.max(maxW,ctx.measureText(t).width));
   const totalH=lh*lines.length;
   lines.forEach((t,i)=>{ const y=-totalH/2+lh/2+i*lh;
-    ctx.lineWidth=Math.max(4,L.size*0.09); ctx.strokeStyle=L.stroke; ctx.strokeText(t,0,y);
+    if(L.stroke && L.stroke!=='none'){                     // poster lettering runs bare, no meme outline
+      ctx.lineWidth=Math.max(4,L.size*0.09); ctx.strokeStyle=L.stroke; ctx.strokeText(t,0,y); }
     ctx.fillStyle=L.fill; ctx.fillText(t,0,y); });
   ctx.restore();
   L._hw=maxW/2+10; L._hh=totalH/2+6;
@@ -747,15 +863,17 @@ function syncControls(){
 }
 const pickers={};   // one live <input type=color> per swatch row, reused across repaints
 function paintSwatches(id,colors,current,onPick,withPick){ const host=document.getElementById(id); host.innerHTML='';
-  colors.forEach(c=>{ const d=document.createElement('div'); d.className='sw'+(c===current?' on':'');
-    d.style.background=c; d.onclick=()=>onPick(c); host.appendChild(d); });
+  colors.forEach(c=>{ const d=document.createElement('div');
+    d.className='sw'+(c===current?' on':'')+(c==='none'?' none':'');
+    if(c==='none') d.title='No outline'; else d.style.background=c;
+    d.onclick=()=>onPick(c); host.appendChild(d); });
   if(!withPick) return;
   let p=pickers[id];
   if(!p){ p=document.createElement('label'); p.className='sw pick'; p.title='Custom color';
     const inp=document.createElement('input'); inp.type='color';
     inp.oninput=e=>p.cb(e.target.value);
     p.appendChild(inp); p.input=inp; pickers[id]=p; }
-  p.cb=onPick; p.input.value=current;
+  p.cb=onPick; if(/^#[0-9a-f]{6}$/i.test(current||'')) p.input.value=current;
   p.classList.toggle('on',!colors.includes(current));
   host.appendChild(p); }
 
@@ -772,6 +890,7 @@ document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>switchTab(t.dataset.t
 /* ratios */
 function setRatio(w,h){ cv.width=w; cv.height=h; resizeDrawLayer(w,h);
   document.querySelectorAll('#ratios button').forEach(x=>x.classList.toggle('on',+x.dataset.w===w&&+x.dataset.h===h));
+  relayoutTemplate();                 // a frame's words follow the new canvas instead of floating off it
   render(); fitZoom(); }
 document.getElementById('ratios').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return;
   setRatio(+b.dataset.w,+b.dataset.h); });
@@ -795,7 +914,9 @@ const grid=document.getElementById('monkeyGrid');
 MONKEYS.forEach((src,i)=>{ const btn=document.createElement('button'); btn.className='mk'+(i===0?' on':'');
   const im=document.createElement('img'); im.src=src; im.loading='lazy'; btn.appendChild(im);
   btn.onclick=()=>{ document.querySelectorAll('.mk').forEach(m=>m.classList.remove('on'));
-    btn.classList.add('on'); const r=RATIOS[i]||[1080,1080]; setRatio(r[0],r[1]); loadBg(src); }; grid.appendChild(btn); });
+    btn.classList.add('on');
+    if(state.tpl==='none'){ const r=RATIOS[i]||[1080,1080]; setRatio(r[0],r[1]); }  // a frame keeps its own shape
+    loadBg(src); }; grid.appendChild(btn); });
 setRatio(RATIOS[0][0],RATIOS[0][1]); loadBg(MONKEYS[0]);
 document.getElementById('expandMonkeys').onclick=function(){
   const ex=document.getElementById('monkeyGrid').classList.toggle('expanded');
@@ -859,6 +980,7 @@ function delSel(){layers=layers.filter(l=>l.id!==selected);selected=null;syncCon
 function layerLabel(L){
   if(L.type==='bg')     return {name:'Background', swatch:L.color};
   if(L.type==='monkey') return {icon:'🐵', name: L.uploaded?'Photo':'Monkey'};
+  if(L.type==='frame')  return {icon:'🖼️', name:(TPL[L.frame]||{}).label+' frame'};
   if(L.type==='draw')   return {icon:'🖍️', name:'Drawing'};
   if(L.type==='text'){ const t=(L.text||'').replace(/\s+/g,' ').trim(); return {icon:'🅣', name: t?t.slice(0,26):'text'}; }
   return {icon:L.emoji, name:'sticker'};
@@ -869,12 +991,14 @@ function moveLayer(L,dir){ if(L.type==='bg')return; const i=layers.indexOf(L); i
 function deleteLayer(L){
   if(L.type==='bg') return;                       // there is always a background
   if(L.type==='monkey'){ removeMonkey(); return; }
+  if(L.type==='frame'){ setTemplate('none'); return; }   // dropping the frame drops its words too
   if(L.type==='draw'){ clearDrawing(); return; }
   layers=layers.filter(x=>x!==L); if(selected===L.id){ selected=null; syncControls(); }
   render(); renderLayers();
 }
 function selectFromList(L){
-  const tab = L.type==='text'?'text' : L.type==='sticker'?'stickers' : L.type==='monkey'?'monkeys' : 'draw';
+  const tab = L.type==='text'?'text' : L.type==='sticker'?'stickers' : L.type==='monkey'?'monkeys'
+            : L.type==='frame'?'frames' : 'draw';
   switchTab(tab); select(L.id);                   // switchTab first (draw mode deselects), then re-select so the row stays lit
 }
 function renderLayers(){
@@ -904,7 +1028,7 @@ function renderLayers(){
 
 /* ---------- draw tab (freehand brush) ---------- */
 const DRAW_COLORS=['#12160F','#7A4E2D','#B07C4E','#F2D479','#E5775F','#67C389','#5F9BE5','#C58FE5','#F5F2E9'];
-const PAPERS=['#F5F2E9','#F2D479','#C7E7CF','#F6C7C7','#12160F','#252E27'];
+const PAPERS=['#F5F2E9','#F2D479','#C7E7CF','#F6C7C7','#12160F','#252E27','#000000','#E7E1D3'];
 const drawBrushBtn=document.getElementById('brushBtn'), drawEraseBtn=document.getElementById('eraseBtn'),
       drawFillBtn=document.getElementById('fillBtn');
 const brushDot=document.getElementById('brushDot');
@@ -940,11 +1064,87 @@ document.getElementById('drawClear').onclick=()=>{ if(!layers.includes(drawLayer
 const paperWrap=document.getElementById('paperSwatches');
 PAPERS.forEach(c=>{ const b=document.createElement('button'); b.type='button';
   b.className='sw'+(c===bgLayer.color?' on':''); b.style.background=c; b.dataset.p=c;
-  b.onclick=()=>{ bgLayer.color=c; syncPaper(); render(); renderLayers(); };
+  b.onclick=()=>{ bgLayer.color=c; prevPaper=null;   // your pick wins over the frame's paper
+    syncPaper(); render(); renderLayers(); };
   paperWrap.appendChild(b); });
 function syncPaper(){ [...paperWrap.children].forEach(x=>x.classList.toggle('on',x.dataset.p===bgLayer.color)); }
 document.getElementById('blankBtn').onclick=()=>{ removeMonkey(); switchTab('draw'); toast('No monkey: draw your own 🐵'); };
 syncBrush(); syncPaper();
+
+/* ---------- frame tab ---------- */
+const TPL_PLACEHOLDER='add text here';
+let prevPaper=null;                                // the paper color from before the first frame
+let frameLayer=null;                               // the frame's own row on the layer stack
+function tplTextLayers(){ return layers.filter(l=>l.tpl); }
+function relayoutTemplate(){                       // keep frame words parked in the caption band
+  const T=TPL[state.tpl]; if(!T||!T.texts) return;
+  const specs=T.texts(cv.width,cv.height,T.rect(cv.width,cv.height));
+  tplTextLayers().forEach((L,i)=>{ const s=specs[i]; if(!s)return;
+    L.x=cv.width/2; L.y=s.y; L.size=s.size; L.wrap=s.wrap; L.rot=0; });
+  fitTemplateText();
+}
+/* a long line wraps to two, so nudge it down rather than let it climb over the picture.
+   Only runs when the frame writes the words; whatever you drag afterwards stays where you put it. */
+function fitTemplateText(){
+  const T=TPL[state.tpl]; if(!T||!T.rect) return;
+  const win=T.rect(cv.width,cv.height), gap=cv.width*0.018;
+  let floor=win.y+win.h+gap;
+  ctx.save();
+  tplTextLayers().forEach(L=>{
+    ctx.font=L.size+'px '+L.font;
+    let lines=(L.caps?L.text.toUpperCase():L.text).split('\n');
+    if(L.wrap) lines=wrapLines(lines,L.wrap);
+    const half=L.size*1.08*lines.length/2;
+    if(L.y-half<floor) L.y=floor+half;
+    floor=L.y+half+gap;
+  });
+  ctx.restore();
+}
+function applyTemplateLines(pair){
+  tplTextLayers().forEach((L,i)=>{ if(pair[i]!=null) L.text=pair[i]; });
+}
+function addTemplateTexts(T){                      // the caption lines start empty and say so
+  const specs=T.texts(cv.width,cv.height,T.rect(cv.width,cv.height));
+  specs.forEach(s=>layers.push(Object.assign({id:uid++,type:'text',tpl:true,rot:0,x:cv.width/2,text:TPL_PLACEHOLDER},s)));
+}
+function rollTemplateLines(){
+  const T=TPL[state.tpl]; if(!T||!T.lines) return;
+  if(!tplTextLayers().length) addTemplateTexts(T);   // you deleted the words, here they are again
+  const now=tplTextLayers().map(l=>l.text).join('|');
+  let pair=T.lines[0], tries=0;
+  do{ pair=T.lines[Math.floor(Math.random()*T.lines.length)]; }while(pair.join('|')===now && ++tries<8);
+  applyTemplateLines(pair); fitTemplateText(); render(); renderLayers(); syncControls();
+}
+function setTemplate(name){
+  const T=TPL[name]; if(!T) return;
+  state.tpl=name;
+  layers=layers.filter(l=>!l.tpl);                 // a frame owns its own caption lines
+  if(T.rect){                                      // the frame itself rides the stack like any other layer
+    if(!frameLayer){ frameLayer={id:uid++,type:'frame'};
+      let idx=layers.indexOf(monkeyLayer); idx = idx>=0 ? idx+1 : 1;   // sits over the photo edge
+      layers.splice(idx,0,frameLayer); }
+    else if(!layers.includes(frameLayer)) layers.splice(Math.min(1,layers.length),0,frameLayer);
+    frameLayer.frame=name;
+  } else if(frameLayer){ layers=layers.filter(l=>l!==frameLayer); frameLayer=null; }
+  if(!layers.some(l=>l.id===selected)) selected=null;
+  if(T.ratio) setRatio(T.ratio[0],T.ratio[1]);
+  if(T.paper){ if(prevPaper==null) prevPaper=bgLayer.color; bgLayer.color=T.paper; syncPaper(); }
+  else if(prevPaper!=null){ bgLayer.color=prevPaper; prevPaper=null; syncPaper(); }  // back to None, back to your paper
+  if(T.texts){ addTemplateTexts(T); fitTemplateText(); }
+  syncTplRow(); syncControls(); render(); renderLayers();
+}
+const tplRow=document.getElementById('tplRow');
+Object.keys(TPL).forEach(k=>{ const b=document.createElement('button'); b.type='button';
+  b.dataset.tpl=k; b.textContent=TPL[k].label; b.onclick=()=>setTemplate(k); tplRow.appendChild(b); });
+function syncTplRow(){
+  [...tplRow.children].forEach(b=>b.classList.toggle('on',b.dataset.tpl===state.tpl));
+  const T=TPL[state.tpl], on=state.tpl!=='none';
+  document.getElementById('tplControls').style.display=on?'block':'none';
+  document.getElementById('tplNoneHint').style.display=on?'none':'block';
+  if(on) document.getElementById('tplHint').textContent=T.hint;
+}
+document.getElementById('rollTpl').onclick=rollTemplateLines;
+syncTplRow();
 
 /* ---------- mobile floating quick actions ---------- */
 const isMobile=()=>window.matchMedia('(max-width:880px)').matches;
