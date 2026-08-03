@@ -1,0 +1,20 @@
+# Assets are served from the repo root, so anything here that isn't part of
+# the website has to say so. gitignore syntax. Keeps the working directory
+# out of the upload, and keeps `wrangler dev` from watching its own state
+# directory and reloading forever.
+
+.git
+.wrangler
+.claude
+node_modules
+
+# Server code and config, not routes.
+worker.js
+wrangler.jsonc
+.assetsignore
+.gitignore
+
+# Local tooling and working files.
+add-monkeys.py
+monkeys/_new
+og-source.png

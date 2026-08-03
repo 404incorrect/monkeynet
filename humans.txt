@@ -1,0 +1,62 @@
+                       _
+                     ,//)
+                     ) /
+                    / /
+             _,^^,/ /
+            (G,66<_/
+            _/\_,_)    _
+           / _    /\  / \
+          / /_/  / /_/  /
+         /  __/ /   \  /
+        (  (  \/  /\  \/
+         \  \    /  \  \
+          \  \  /    \  \
+           \  \/      \  \
+            \  \       \  \
+             \__)       \__)
+
+/* MONKEYNET */
+
+  The internet is a canopy.
+
+  MonkeyNet is an untamed, chaotic thicket of the web engineered
+  specifically for forging high-frequency simian signals, and executing a
+  violent vertical ascent out of the flat human mud.
+
+  It is not a joke about a website. It is a website.
+
+/* THE MONKEY RESPONSIBLE */
+
+  Handle       : 404incorrect
+  Repository   : https://github.com/onehundredbeers/monkeynet
+  Site         : https://monkeynet.org
+
+/* HOW IT IS BUILT */
+
+  HTML, CSS and JavaScript, written by hand.
+  No framework. No build step. No bundler. No npm install.
+  Every page is a file you can open, read, and understand.
+
+  Hosting      : Cloudflare Workers, static assets
+  Feeds        : one Worker, no dependencies, /feeds/
+  Gallery      : Supabase, free tier, row level security on
+  Canopy Count : a Postgres row that can only be made to go up
+  Climb Log    : reads its own commit history, live
+  Type         : Anton
+
+/* THINGS THAT ARE TRUE HERE */
+
+  Nobody has an account. Nothing has a feed rank.
+  The gallery has no likes, because a wall does not need a scoreboard.
+  The hit counter only climbs, the way the old ones did, shamelessly.
+  MonkeyNews links out to every source, every time.
+  A candle stays lit for Harambe.
+
+/* IF YOU ARE READING THIS */
+
+  You went looking. That is the whole personality type this file is for.
+  Everything MonkeyNet publishes is also available in RSS and JSON Feed
+  at /feeds/, CORS open, no key, no rate limit but the one Cloudflare
+  gives everyone. Take it, mirror it, do something strange with it.
+
+  I monkey, therefore we climb. 🐵🍌

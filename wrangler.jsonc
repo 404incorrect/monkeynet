@@ -5,8 +5,13 @@
   "observability": {
     "enabled": true
   },
+  // Static files still win: the Worker only runs for paths with no file
+  // behind them, which today means /feeds/*. Everything else falls
+  // through to ASSETS untouched. See worker.js.
+  "main": "worker.js",
   "assets": {
-    "directory": "."
+    "directory": ".",
+    "binding": "ASSETS"
   },
   "compatibility_flags": [
     "nodejs_compat"

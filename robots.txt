@@ -2,3 +2,11 @@ User-agent: *
 Allow: /
 
 Sitemap: https://monkeynet.org/sitemap.xml
+
+# Feeds, CORS open, no key needed:
+#   https://monkeynet.org/feeds/climb-log.xml
+#   https://monkeynet.org/feeds/climb-log.json
+#   https://monkeynet.org/feeds/news.xml
+#   https://monkeynet.org/feeds/news.json
+#
+# The monkey responsible: https://monkeynet.org/humans.txt

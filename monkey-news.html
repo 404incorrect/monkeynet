@@ -9,6 +9,8 @@
 <title>MonkeyNews · The Canopy Wire · Real monkey dispatches</title>
 <meta name="description" content="The Canopy Wire: real dispatches on real monkeys out in the world, with links out to every source.">
 <link rel="canonical" href="https://monkeynet.org/monkey-news.html">
+<link rel="alternate" type="application/rss+xml" title="MonkeyNews · The Canopy Wire" href="/feeds/news.xml">
+<link rel="alternate" type="application/feed+json" title="MonkeyNews · The Canopy Wire" href="/feeds/news.json">
 <!-- Open Graph -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="MonkeyNet">
@@ -123,6 +125,17 @@
 
   <hr class="rule">
 
+  <!-- Every dispatch needs an id and a data-date:
+
+         <article class="wire good" id="short-slug" data-date="2026-07-16">
+
+       The id is its permalink (#short-slug) and its stable identity in the
+       feeds, so once a dispatch is published the id never changes. The date
+       is when we filed it, newest at the top. /feeds/news.xml and
+       /feeds/news.json are read straight off this page, so a dispatch added
+       here shows up in both without anything else being touched.
+  -->
+
   <!-- A dispatch can carry a photo. Put the file in /news/ and drop this in
        right under the dateline, credit line included:
 
@@ -134,7 +147,7 @@
   -->
 
   <!-- 1 · reported July 16, 2026 -->
-  <article class="wire good">
+  <article class="wire good" id="likweli" data-date="2026-07-16">
     <div class="beat">🐒 Newly Named</div>
     <h2>A monkey with orange lips was in the Congo the whole time, and now it has a name</h2>
     <div class="dateline"><b>Lomami National Park, DR Congo</b> · described July 15, 2026</div>
@@ -151,7 +164,7 @@
   </article>
 
   <!-- 2 · reported 2026 -->
-  <article class="wire good">
+  <article class="wire good" id="ape-laughter" data-date="2026-07-12">
     <div class="beat">😄 Deep Roots</div>
     <h2>Apes and humans have been laughing the same way for fifteen million years</h2>
     <div class="dateline"><b>University of Warwick</b> · 2026</div>
@@ -165,7 +178,7 @@
   </article>
 
   <!-- 3 · reported July 10, 2026 -->
-  <article class="wire good">
+  <article class="wire good" id="primate-act" data-date="2026-07-10">
     <div class="beat">🏛️ Policy</div>
     <h2>A bill in Congress would stop importing monkeys for biomedical research</h2>
     <div class="dateline"><b>United States · Congress</b> · introduced July 10, 2026</div>
@@ -179,7 +192,7 @@
   </article>
 
   <!-- 4 · reported July 10, 2026 -->
-  <article class="wire good">
+  <article class="wire good" id="doctors-against-primate-testing" data-date="2026-07-10">
     <div class="beat">🩺 Reform</div>
     <h2>More than 550 doctors want primate testing phased out for human-based methods</h2>
     <div class="dateline"><b>United States · HHS</b> · July 10, 2026</div>
@@ -194,7 +207,7 @@
   </article>
 
   <!-- 5 · reported July 1, 2026 -->
-  <article class="wire good">
+  <article class="wire good" id="retired-macaques" data-date="2026-07-01">
     <div class="beat">🌿 Retirement</div>
     <h2>A hundred and thirty retired research macaques are looking for a better branch to land on</h2>
     <div class="dateline"><b>United States · CDC</b> · reopened June 20, reported July 1, 2026</div>
@@ -208,7 +221,7 @@
   </article>
 
   <!-- 6 · reported June 30, 2026 -->
-  <article class="wire good">
+  <article class="wire good" id="seattle-colobus" data-date="2026-06-30">
     <div class="beat">🐒 New Climbers</div>
     <h2>Seattle's canopy gets its first colobus in twenty-nine years, arriving all in white</h2>
     <div class="dateline"><b>Woodland Park Zoo, Seattle</b> · born June 15, announced June 30, 2026</div>
@@ -221,7 +234,7 @@
   </article>
 
   <!-- 7 · reported June 30, 2026 -->
-  <article class="wire play">
+  <article class="wire play" id="lopburi-macaques" data-date="2026-06-30">
     <div class="beat">🐒 Jailbreak</div>
     <h2>Nearly a hundred macaques let themselves out, and it's hard to blame them</h2>
     <div class="dateline"><b>Lopburi, Thailand</b> · June 30, 2026</div>
@@ -236,7 +249,7 @@
   </article>
 
   <!-- 8 · reported June 25, 2026 -->
-  <article class="wire warn">
+  <article class="wire warn" id="ichikawa-laser" data-date="2026-06-25">
     <div class="beat">✋ Hands Off</div>
     <h2>Someone pointed a laser at a baby monkey for the feed. The zoo is done asking nicely.</h2>
     <div class="dateline"><b>Ichikawa City Zoo, Japan</b> · June 25, 2026</div>
@@ -249,7 +262,7 @@
   </article>
 
   <!-- 9 · reported June 16, 2026 -->
-  <article class="wire grave">
+  <article class="wire grave" id="tapanuli-landslide" data-date="2026-06-16">
     <div class="beat">The Canopy Itself</div>
     <h2>Four days of rain took roughly seven percent of the rarest great ape alive</h2>
     <div class="dateline"><b>Batang Toru, Indonesia</b> · study published June 16, 2026</div>
@@ -263,7 +276,7 @@
   </article>
 
   <!-- 10 · reported May 31, 2026 -->
-  <article class="wire play">
+  <article class="wire play" id="neem-tree-audit" data-date="2026-05-31">
     <div class="beat">🍌 Heist</div>
     <h2>One monkey, one neem tree, and a thirty-minute audit of the fiat system</h2>
     <div class="dateline"><b>Bulandshahr, Uttar Pradesh, India</b> · May 31, 2026</div>
@@ -276,7 +289,7 @@
   </article>
 
   <!-- 11 · reported May 2026 -->
-  <article class="wire good">
+  <article class="wire good" id="singapore-langurs" data-date="2026-05-01">
     <div class="beat">🌿 Comeback</div>
     <h2>Singapore counted its rarest leaf-monkeys again, and there are twice as many</h2>
     <div class="dateline"><b>Singapore</b> · May 2026</div>
@@ -291,7 +304,7 @@
   </article>
 
   <!-- 12 · reported April 2026 -->
-  <article class="wire grave">
+  <article class="wire grave" id="thailand-proboscis" data-date="2026-04-01">
     <div class="beat">Trafficking</div>
     <h2>A proboscis monkey turned up in Thailand, far from the only island that is home</h2>
     <div class="dateline"><b>Thailand</b> · April 2026</div>
@@ -305,7 +318,7 @@
   </article>
 
   <!-- 13 · reported April 2026 -->
-  <article class="wire good">
+  <article class="wire good" id="gibbon-lima" data-date="2026-04-01">
     <div class="beat">🐒 New Arrival</div>
     <h2>A critically endangered gibbon was born in England, and named Lima</h2>
     <div class="dateline"><b>Port Lympne, England</b> · April 2026</div>
