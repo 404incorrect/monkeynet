@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- MonkeyNet - Terminal Velocity / the Sand Monkey Drop Simulator -->
+<!-- Identity: an unlisted page. Not in the nav, not in the sitemap, not in any feed, and
+     marked noindex so the crawlers leave it alone. It is reachable by anyone who has the
+     URL, which is the only way anybody gets here. A beanbag with a face, a drag equation,
+     and a very tall building. No real primates, no real deck, no real railing to climb. -->
+<meta charset="UTF-8">
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACAklEQVR4nN1Xu23DMBB9DDKBgUyQwgbUphO8AAdQa1fqUmgSFU6lNFKrAbSAoyJAWgNWkQkMOCMwRXwEdSZpyZSaPMCAefy84/F+Av4bujJVY9Y/zEE+RgkRSponcY9MyghNc+ityerWyROkAJFLGXnXNc3BqcRjiAJE/vT8osen7y8A6MmkBLK6te6/2wfo9iYRjW0y/lTBCkyFu54gT2IlxQqNOgIAFusUAKCUws/Hu1UmxQpIoLgvTGoBIa79zCYzcZcFsroVSKDf9Lwv9Nzp7fNKBgCNOlojYZI8QGHInY8iYtYwvBx8yQf9OUpIsyUiE7Yw8xETJnNCTjaEHJihFtgwey0gbF43+n+1qwYpEZyK6WCT3BxndSuyuhWDU3GexIp+531h3cTJh8ClRE8Bs7xKGaHaVc43HkPug1bAvNVyW4jlthA2kiFO5wPf/8DJ+Qbf+5ngTsfHLuhMKGWkmwafQuRcUkZquS168z7SrkwVpWqzOXFGAZHzBpPyO5Hfsg7N03raT3DWAiLmheTvoKJ3OFeaz+VJrLK6FYt1emVRqwWyuhVNc/BWMW6Z4FQ8Jra7MlVm6+3bc+tcbQFaQEnI9nHRlanKk1j5LDMW1kNs/b7rxr4bDrGq9xY+J7tFNPRJg81o1gvTy11yjqCG5LwvFMU1J6FxtavgKmoA8AtYgj+GI+VMFwAAAABJRU5ErkJggg==">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Terminal Velocity - the Sand Monkey Drop Simulator - MonkeyNet</title>
+<meta name="description" content="A slow-motion drop test for a sand-filled monkey plush. Real drag equations, fake monkey.">
+<meta name="robots" content="noindex, nofollow">
+<!-- Open Graph: for when somebody hands the link to somebody else -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="MonkeyNet">
+<meta property="og:title" content="Terminal Velocity - the Sand Monkey Drop Simulator">
+<meta property="og:description" content="Pick a height, pick a sand fill, and watch gravity do the arithmetic in slow motion.">
+<meta property="og:image" content="https://monkeynet.org/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="I monkey, U monkey, together we climb">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Terminal Velocity - the Sand Monkey Drop Simulator">
+<meta name="twitter:description" content="Pick a height, pick a sand fill, and watch gravity do the arithmetic in slow motion.">
+<meta name="twitter:image" content="https://monkeynet.org/og-image.png">
+<style>
+  :root{
+    --bg-top:#0d1b2a;
+    --bg-bottom:#1b3a5c;
+    --panel:#0f1f2eee;
+    --panel-border:#2a4a63;
+    --text:#eaf2f8;
+    --dim:#9db4c6;
+    --accent:#ffb454;
+    --accent2:#5ec8ff;
+    --ground:#14261a;
+    --building:#3a4a58;
+    --building-edge:#57707f;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:linear-gradient(180deg,var(--bg-top),var(--bg-bottom) 70%,#284a34 100%);
+    color:var(--text);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    min-height:100vh;
+    padding:20px 16px 40px;
+  }
+  h1{
+    font-size:1.3rem;
+    font-weight:600;
+    margin:0 0 4px;
+    letter-spacing:.2px;
+  }
+  .subtitle{
+    color:var(--dim);
+    font-size:.85rem;
+    margin:0 0 18px;
+    text-align:center;
+    max-width:520px;
+  }
+  .stage-wrap{
+    position:relative;
+    width:100%;
+    max-width:620px;
+  }
+  canvas{
+    width:100%;
+    display:block;
+    border-radius:12px;
+    border:1px solid var(--panel-border);
+    background:#0a1622;
+  }
+  .hud{
+    position:absolute;
+    top:10px;
+    left:10px;
+    right:10px;
+    display:flex;
+    justify-content:space-between;
+    gap:8px;
+    pointer-events:none;
+    font-variant-numeric:tabular-nums;
+  }
+  .hud-box{
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:8px;
+    padding:6px 10px;
+    font-size:.72rem;
+    color:var(--dim);
+    backdrop-filter:blur(2px);
+  }
+  .hud-box b{
+    display:block;
+    color:var(--text);
+    font-size:1rem;
+    font-weight:700;
+  }
+  .hud-box.accent b{ color:var(--accent); }
+  .hud-box.accent2 b{ color:var(--accent2); }
+
+  .controls{
+    width:100%;
+    max-width:620px;
+    margin-top:16px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:10px;
+    padding:12px 14px;
+  }
+  .panel h2{
+    font-size:.68rem;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--dim);
+    margin:0 0 8px;
+    font-weight:600;
+  }
+  .row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:8px;
+  }
+  .row:last-child{ margin-bottom:0; }
+  .row label{ font-size:.8rem; color:var(--text); }
+  input[type=range]{
+    width:110px;
+    accent-color:var(--accent);
+  }
+  .val{
+    font-size:.78rem;
+    color:var(--accent2);
+    min-width:44px;
+    text-align:right;
+    font-variant-numeric:tabular-nums;
+  }
+  .buttons{
+    display:flex;
+    gap:8px;
+    width:100%;
+    max-width:620px;
+    margin-top:12px;
+  }
+  button{
+    flex:1;
+    padding:10px 12px;
+    border-radius:9px;
+    border:1px solid var(--panel-border);
+    background:#16283a;
+    color:var(--text);
+    font-size:.85rem;
+    font-weight:600;
+    cursor:pointer;
+    transition:background .15s, transform .05s;
+  }
+  button:hover{ background:#1d3348; }
+  button:active{ transform:scale(0.97); }
+  button.primary{
+    background:linear-gradient(180deg,#ffb454,#e69a3a);
+    color:#25190a;
+    border-color:#e69a3a;
+  }
+  button.primary:hover{ background:linear-gradient(180deg,#ffc574,#f0a842); }
+
+  .result{
+    width:100%;
+    max-width:620px;
+    margin-top:12px;
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:10px;
+    padding:12px 14px;
+    font-size:.82rem;
+    color:var(--dim);
+    text-align:center;
+    min-height:20px;
+  }
+  .result b{ color:var(--accent); }
+  .footer-note{
+    max-width:620px;
+    color:#6f8598;
+    font-size:.7rem;
+    text-align:center;
+    margin-top:14px;
+    line-height:1.5;
+  }
+
+  .back-home{
+    max-width:620px;
+    text-align:center;
+    font-size:.72rem;
+    color:#5d7386;
+    margin:18px 0 0;
+  }
+  .back-home a{
+    color:var(--accent);
+    text-decoration:none;
+    font-weight:600;
+  }
+  .back-home a:hover{ text-decoration:underline; }
+
+  @media (max-width:480px){
+    .controls{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<h1>🐒 Sand Monkey Drop Simulator</h1>
+<p class="subtitle">A physics-accurate (and entirely fictional) slow-motion drop test from an observation deck. No real primates involved, just a beanbag with a face.</p>
+
+<div class="stage-wrap">
+  <canvas id="stage" width="620" height="520"></canvas>
+  <div class="hud">
+    <div class="hud-box accent"><span>Height Remaining</span><b id="hHeight">390 ft</b></div>
+    <div class="hud-box"><span>Elapsed Time</span><b id="hTime">0.00 s</b></div>
+    <div class="hud-box accent2"><span>Velocity</span><b id="hVel">0 mph</b></div>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="panel">
+    <h2>Drop Setup</h2>
+    <div class="row">
+      <label>Building height (ft)</label>
+      <input type="range" id="heightSlider" min="50" max="800" value="390" step="10">
+      <span class="val" id="heightVal">390</span>
+    </div>
+    <div class="row">
+      <label>Sand fill (drag)</label>
+      <input type="range" id="dragSlider" min="0" max="100" value="55" step="1">
+      <span class="val" id="dragVal">55%</span>
+    </div>
+  </div>
+  <div class="panel">
+    <h2>Playback</h2>
+    <div class="row">
+      <label>Slow-mo factor</label>
+      <input type="range" id="slowSlider" min="1" max="10" value="4" step="1">
+      <span class="val" id="slowVal">4x</span>
+    </div>
+    <div class="row">
+      <label>Camera</label>
+      <input type="range" id="camSlider" min="0" max="1" value="1" step="1">
+      <span class="val" id="camVal">Cinematic</span>
+    </div>
+  </div>
+</div>
+
+<div class="buttons">
+  <button class="primary" id="dropBtn">Drop the Monkey</button>
+  <button id="resetBtn">Reset</button>
+</div>
+
+<div class="result" id="resultBox">Set your height and hit drop. Physics, real drag equations and a fake monkey, will do the rest.</div>
+
+<p class="footer-note">Simulated with gravity (32.2 ft/s²) and a drag term scaled by "sand fill" density. Higher sand fill = denser pack = less air resistance = faster, more predictable fall. Purely illustrative: not a real engineering model, and no actual observation deck lets you throw anything off it.</p>
+
+<p class="back-home"><a href="/">🐒 MonkeyNet</a> · unlisted, unlinked, and yours because somebody gave you the address</p>
+
+<script>
+(function(){
+  const canvas = document.getElementById('stage');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+
+  const heightSlider = document.getElementById('heightSlider');
+  const dragSlider = document.getElementById('dragSlider');
+  const slowSlider = document.getElementById('slowSlider');
+  const camSlider = document.getElementById('camSlider');
+  const heightVal = document.getElementById('heightVal');
+  const dragVal = document.getElementById('dragVal');
+  const slowVal = document.getElementById('slowVal');
+  const camVal = document.getElementById('camVal');
+  const hHeight = document.getElementById('hHeight');
+  const hTime = document.getElementById('hTime');
+  const hVel = document.getElementById('hVel');
+  const resultBox = document.getElementById('resultBox');
+  const dropBtn = document.getElementById('dropBtn');
+  const resetBtn = document.getElementById('resetBtn');
+
+  let buildingHeightFt = 390;
+  let dragPct = 55;
+  let slowFactor = 4;
+  let cinematic = true;
+
+  let state = 'idle'; // idle, falling, landed
+  let simTime = 0;      // seconds, real physics time
+  let posFt = 0;        // distance fallen, ft
+  let velFps = 0;
+  let rotation = 0;
+  let rotSpeed = 0;
+  let trail = [];
+  let particles = [];
+  let lastFrame = null;
+  let rafId = null;
+
+  const G = 32.2; // ft/s^2
+
+  function dragCoeffFromPct(pct){
+    // higher pct (denser sand pack) => lower drag coefficient (less tumble resistance)
+    // map 0-100 to a drag term k (1/ft) used in v_terminal-ish model
+    const minK = 0.0009;
+    const maxK = 0.006;
+    return maxK - (pct/100)*(maxK-minK);
+  }
+
+  function updateLabels(){
+    heightVal.textContent = buildingHeightFt;
+    dragVal.textContent = dragPct + '%';
+    slowVal.textContent = slowFactor + 'x';
+    camVal.textContent = cinematic ? 'Cinematic' : 'Static';
+  }
+
+  heightSlider.addEventListener('input', e=>{
+    buildingHeightFt = parseInt(e.target.value,10);
+    updateLabels();
+    if(state==='idle') draw();
+  });
+  dragSlider.addEventListener('input', e=>{
+    dragPct = parseInt(e.target.value,10);
+    updateLabels();
+  });
+  slowSlider.addEventListener('input', e=>{
+    slowFactor = parseInt(e.target.value,10);
+    updateLabels();
+  });
+  camSlider.addEventListener('input', e=>{
+    cinematic = e.target.value === '1';
+    updateLabels();
+  });
+
+  function resetSim(){
+    state='idle';
+    simTime=0;
+    posFt=0;
+    velFps=0;
+    rotation=0;
+    rotSpeed=(Math.random()*2-1)*2.2;
+    trail=[];
+    particles=[];
+    lastFrame=null;
+    hHeight.textContent = buildingHeightFt + ' ft';
+    hTime.textContent = '0.00 s';
+    hVel.textContent = '0 mph';
+    resultBox.innerHTML = 'Set your height and hit drop. Physics, real drag equations and a fake monkey, will do the rest.';
+    if(rafId) cancelAnimationFrame(rafId);
+    draw();
+  }
+
+  dropBtn.addEventListener('click', ()=>{
+    if(state==='falling') return;
+    resetSim();
+    state='falling';
+    resultBox.textContent = 'Falling...';
+    lastFrame = performance.now();
+    rafId = requestAnimationFrame(loop);
+  });
+  resetBtn.addEventListener('click', resetSim);
+
+  function loop(now){
+    const dtReal = Math.min((now-lastFrame)/1000, 0.05);
+    lastFrame = now;
+    const dtSim = dtReal / slowFactor; // physics time per real second, slowed down
+
+    if(state==='falling'){
+      const k = dragCoeffFromPct(dragPct);
+      // simple velocity-squared drag model: dv/dt = g - k*v^2
+      const accel = G - k*velFps*velFps;
+      velFps += accel*dtSim;
+      posFt += velFps*dtSim;
+      simTime += dtSim;
+      rotation += rotSpeed*dtSim*3;
+
+      if(posFt >= buildingHeightFt){
+        posFt = buildingHeightFt;
+        state='landed';
+        spawnImpact();
+        const mph = (velFps*0.681818).toFixed(1);
+        resultBox.innerHTML = `Impact after <b>${simTime.toFixed(2)}s</b> at <b>${mph} mph</b>, sand fill: ${dragPct}%. A real observation deck would never let this happen, which is the whole point of the railing.`;
+      }
+
+      trail.push({p:posFt, r:rotation, t:simTime});
+      if(trail.length>28) trail.shift();
+
+      const remaining = Math.max(0, buildingHeightFt - posFt);
+      hHeight.textContent = remaining.toFixed(0) + ' ft';
+      hTime.textContent = simTime.toFixed(2) + ' s';
+      hVel.textContent = (velFps*0.681818).toFixed(0) + ' mph';
+    }
+
+    updateParticles(dtReal);
+    draw();
+
+    if(state==='falling'){
+      rafId = requestAnimationFrame(loop);
+    } else if(state==='landed'){
+      rafId = requestAnimationFrame(loop);
+      // keep animating particles for a bit then stop
+      if(particles.length===0){
+        cancelAnimationFrame(rafId);
+      }
+    }
+  }
+
+  function spawnImpact(){
+    for(let i=0;i<26;i++){
+      const ang = Math.random()*Math.PI - Math.PI; // upward spread
+      const spd = 60+Math.random()*160;
+      particles.push({
+        x: groundX(),
+        y: H-46,
+        vx: Math.cos(ang)*spd*0.02,
+        vy: -Math.abs(Math.sin(ang))*spd*0.03 - 1,
+        life: 1,
+        size: 1.5+Math.random()*2.5,
+        color: Math.random()<0.5 ? '#d9b88c' : '#c2996b'
+      });
+    }
+  }
+
+  function updateParticles(dt){
+    for(let i=particles.length-1;i>=0;i--){
+      const p=particles[i];
+      p.vy += 3.5*dt;
+      p.x += p.vx*dt*60;
+      p.y += p.vy*dt*60;
+      p.life -= dt*0.9;
+      if(p.life<=0) particles.splice(i,1);
+    }
+  }
+
+  function groundX(){ return W*0.62; }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+
+    // sky gradient
+    const sky = ctx.createLinearGradient(0,0,0,H);
+    sky.addColorStop(0,'#0d1b2a');
+    sky.addColorStop(0.55,'#1b3a5c');
+    sky.addColorStop(0.72,'#2c4f47');
+    sky.addColorStop(1,'#1b3324');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0,0,W,H);
+
+    // stars
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    for(let i=0;i<40;i++){
+      const sx = (i*53)%W;
+      const sy = (i*97)%(H*0.4);
+      ctx.fillRect(sx, sy, 1.2, 1.2);
+    }
+
+    const groundY = H-46;
+    const bldgX = groundX();
+    const bldgWidth = 92;
+    const bldgTopY = 60;
+
+    // distant skyline
+    ctx.fillStyle = '#16283a';
+    [ [40,220,50],[110,260,40],[170,200,60],[500,240,45],[550,190,55] ].forEach(([x,h,w])=>{
+      ctx.fillRect(x, groundY-h, w, h);
+    });
+
+    // ground
+    ctx.fillStyle = '#14261a';
+    ctx.fillRect(0, groundY, W, H-groundY);
+    ctx.fillStyle = '#0f1e15';
+    ctx.fillRect(0, groundY, W, 4);
+
+    // building
+    const bgrad = ctx.createLinearGradient(bldgX-bldgWidth/2,0,bldgX+bldgWidth/2,0);
+    bgrad.addColorStop(0,'#2c3d4a');
+    bgrad.addColorStop(0.5,'#425a6b');
+    bgrad.addColorStop(1,'#2c3d4a');
+    ctx.fillStyle = bgrad;
+    ctx.fillRect(bldgX-bldgWidth/2, bldgTopY, bldgWidth, groundY-bldgTopY);
+
+    // windows
+    ctx.fillStyle = 'rgba(255,214,140,0.55)';
+    for(let row=0; row*22+bldgTopY+14 < groundY-10; row++){
+      for(let col=0; col<4; col++){
+        if((row+col)%3===0) continue;
+        const wx = bldgX-bldgWidth/2+10+col*20;
+        const wy = bldgTopY+14+row*22;
+        ctx.fillRect(wx, wy, 10, 12);
+      }
+    }
+
+    // observation deck ledge
+    ctx.fillStyle = '#57707f';
+    ctx.fillRect(bldgX-bldgWidth/2-8, bldgTopY-6, bldgWidth+16, 10);
+    ctx.strokeStyle = '#8fa6b3';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for(let rx=bldgX-bldgWidth/2-4; rx<bldgX+bldgWidth/2+4; rx+=10){
+      ctx.moveTo(rx, bldgTopY-6);
+      ctx.lineTo(rx, bldgTopY-16);
+    }
+    ctx.stroke();
+
+    // scale: pixels per foot
+    const dropTop = bldgTopY+2;
+    const dropBottom = groundY-6;
+    const pxPerFt = (dropBottom-dropTop)/buildingHeightFt;
+
+    // trail (motion blur streaks)
+    if(cinematic){
+      trail.forEach((pt, i)=>{
+        const alpha = (i/trail.length)*0.25;
+        const py = dropTop + pt.p*pxPerFt;
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.translate(bldgX, py);
+        ctx.rotate(pt.r);
+        drawMonkey(ctx, 0, 0, 9, dragPct);
+        ctx.restore();
+      });
+    }
+
+    // current monkey position
+    if(state!=='idle'){
+      const py = dropTop + posFt*pxPerFt;
+      ctx.save();
+      ctx.translate(bldgX, Math.min(py, dropBottom));
+      ctx.rotate(rotation);
+      drawMonkey(ctx, 0, 0, 13, dragPct);
+      ctx.restore();
+    } else {
+      ctx.save();
+      ctx.translate(bldgX, dropTop-4);
+      drawMonkey(ctx, 0, 0, 13, dragPct);
+      ctx.restore();
+    }
+
+    // impact particles (sand)
+    particles.forEach(p=>{
+      ctx.globalAlpha = Math.max(0,p.life);
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+
+    // height marker text near building top
+    ctx.fillStyle = 'rgba(234,242,248,0.55)';
+    ctx.font = '11px -apple-system, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(buildingHeightFt+' ft', bldgX+bldgWidth/2+34, bldgTopY+4);
+  }
+
+  function drawMonkey(ctx, x, y, s, drag){
+    // simple round sand-monkey plush: body, ears, face, tail
+    ctx.save();
+    ctx.translate(x,y);
+
+    // body squish factor based on drag (denser sand = rounder/tighter)
+    const squish = 0.85 + (drag/100)*0.15;
+
+    // tail
+    ctx.strokeStyle = '#7a5230';
+    ctx.lineWidth = s*0.22;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(s*0.1, s*0.6);
+    ctx.quadraticCurveTo(s*1.3, s*0.9, s*0.9, s*1.7);
+    ctx.stroke();
+
+    // body
+    ctx.fillStyle = '#c98a4b';
+    ctx.beginPath();
+    ctx.ellipse(0,0, s*squish, s, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    // belly
+    ctx.fillStyle = '#e8c79a';
+    ctx.beginPath();
+    ctx.ellipse(0, s*0.15, s*0.62*squish, s*0.68, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    // ears
+    ctx.fillStyle = '#c98a4b';
+    ctx.beginPath();
+    ctx.arc(-s*0.85, -s*0.55, s*0.38, 0, Math.PI*2);
+    ctx.arc(s*0.85, -s*0.55, s*0.38, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = '#e8c79a';
+    ctx.beginPath();
+    ctx.arc(-s*0.85, -s*0.55, s*0.2, 0, Math.PI*2);
+    ctx.arc(s*0.85, -s*0.55, s*0.2, 0, Math.PI*2);
+    ctx.fill();
+
+    // face
+    ctx.fillStyle = '#f2dcb8';
+    ctx.beginPath();
+    ctx.ellipse(0,-s*0.25, s*0.55, s*0.48, 0,0,Math.PI*2);
+    ctx.fill();
+
+    // eyes
+    ctx.fillStyle = '#2b1a10';
+    ctx.beginPath();
+    ctx.arc(-s*0.2, -s*0.3, s*0.09, 0, Math.PI*2);
+    ctx.arc(s*0.2, -s*0.3, s*0.09, 0, Math.PI*2);
+    ctx.fill();
+
+    // mouth
+    ctx.strokeStyle = '#2b1a10';
+    ctx.lineWidth = s*0.06;
+    ctx.beginPath();
+    ctx.arc(0,-s*0.1, s*0.14, 0.15*Math.PI, 0.85*Math.PI);
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  updateLabels();
+  draw();
+})();
+</script>
+</body>
+</html>
